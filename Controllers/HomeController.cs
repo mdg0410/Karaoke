@@ -25,6 +25,11 @@ namespace Karaoke.Controllers
             return View(productos);
         }
 
+        public IActionResult Cancionero()
+        {
+            return View();
+        }
+
         public IActionResult Karaoke()
         {
             return View();

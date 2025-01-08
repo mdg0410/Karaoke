@@ -32,4 +32,10 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// Ruta personalizada para el método Validar
+app.MapControllerRoute(
+    name: "mesaValidar",
+    pattern: "{controller=Mesa}/{action=Validar}/{idMesa?}");
+
+
 app.Run();

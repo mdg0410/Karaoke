@@ -14,8 +14,20 @@
     <div style="color: green;">@ViewBag.Success</div>
 }
 
-<form asp-action="EnviarFormulario" method="post">
+<form class="form-Panel" asp-action="EnviarFormulario" method="post">
     <label for="datos">Ingrese los datos (formato: 123-456-789):</label>
     <input type="text" id="datos" name="datos" pattern="^\d{1,4}-\d{1,4}-\d{1,4}$" required />
     <button type="submit">Enviar</button>
 </form>
+
+<style>
+
+    .form-Panel {
+		display: flex;
+		flex-direction: column;
+		width: 70%;
+		margin: 0 auto;
+		gap: 10px;
+    }
+
+</style>

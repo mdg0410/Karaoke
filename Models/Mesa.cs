@@ -22,6 +22,10 @@ public partial class Mesa
     [Column(TypeName = "datetime")]
     public DateTime? FechaCreacion { get; set; }
 
+    [StringLength(255)]
+    [Unicode(false)]
+    public string? Credencial { get; set; }
+
     [InverseProperty("IdMesaNavigation")]
     public virtual ICollection<CancionesMesa> CancionesMesas { get; set; } = new List<CancionesMesa>();
 
