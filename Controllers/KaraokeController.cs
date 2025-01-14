@@ -1,31 +1,49 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Mvc;
 using Karaoke.Data;
 using Karaoke.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
+using Karaoke.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-public class KaraokeController : Controller
+
+namespace Karaoke.Controllers
 {
-    // Acción para mostrar el formulario
-    public IActionResult Index()
+    [ApiController]
+    [Route("[controller]")]
+    public class KaraokeController : Controller
     {
-        return View();
-    }
+        private readonly KaraokeContext _context;
 
-    // Acción para procesar el formulario
-    [HttpPost]
-    public IActionResult EnviarFormulario(string datos)
-    {
-        // Validar formato con regex (1-9999 en grupos separados por '-')
-        string pattern = @"^([1-9][0-9]{0,3})-([1-9][0-9]{0,3})-([1-9][0-9]{0,3})$";
-        if (!Regex.IsMatch(datos, pattern))
+        public KaraokeController(KaraokeContext context)
         {
-            ViewBag.Error = "El formato de los datos es incorrecto. Use el formato: 123-456-789 (solo números del 1 al 9999).";
-            return View("Index");
+            _context = context;
         }
 
-        // Procesar datos (puedes enviar a la DB o cualquier otra lógica)
-        ViewBag.Success = "Datos enviados correctamente.";
-        return View("Index");
+        [HttpPost("EnviarFormulario")]
+        public async Task<IActionResult> EnviarFormulario([FromBody] List<CancionViewModel> data)
+        {
+            foreach (var cancion in data)
+            {
+                var cmd = _context.Database.GetDbConnection().CreateCommand();
+                cmd.CommandText = "AgregarCancion";  // Asegúrate de que el nombre del SP esté correcto
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // Envía el ID de la mesa, las canciones como texto y el estado de la canción
+                cmd.Parameters.Add(new SqlParameter("@IdMesa", SqlDbType.Int) { Value = cancion.IdMesa });
+                cmd.Parameters.Add(new SqlParameter("@Canciones", SqlDbType.VarChar) { Value = cancion.Canciones });  // Canción como texto
+
+                _context.Database.OpenConnection();
+                await cmd.ExecuteNonQueryAsync();
+                _context.Database.CloseConnection();
+            }
+
+            return Ok(new { message = "Datos enviados correctamente" });
+        }
+
     }
 }

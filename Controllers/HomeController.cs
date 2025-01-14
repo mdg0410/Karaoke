@@ -1,8 +1,11 @@
+using System.Data;
 using System.Diagnostics;
 using Karaoke.Data;
 using Karaoke.Models;
 using Karaoke.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Karaoke.Controllers
 {
@@ -39,12 +42,7 @@ namespace Karaoke.Controllers
             return View();
         }
 
-        public IActionResult Karaoke()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
+       public IActionResult Karaoke()
         {
             return View();
         }

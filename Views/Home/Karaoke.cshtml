@@ -14,20 +14,70 @@
     <div style="color: green;">@ViewBag.Success</div>
 }
 
-<form class="form-Panel" asp-action="EnviarFormulario" method="post">
+<form class="form-Panel" id="karaokeForm">
     <label for="datos">Ingrese los datos (formato: 123-456-789):</label>
     <input type="text" id="datos" name="datos" pattern="^\d{1,4}-\d{1,4}-\d{1,4}$" required />
     <button type="submit">Enviar</button>
 </form>
 
+<script>
+        document.getElementById("karaokeForm").addEventListener("submit", async function (event) {
+        // Prevenir el envío predeterminado del formulario
+        event.preventDefault();
+
+        // Obtener valores de los campos
+        const inputElement = document.getElementById("datos"); // Obtener referencia al input
+        const datos = inputElement.value; // Valor del input
+        const idMesaKaraoke = localStorage.getItem("idMesa") || "";
+
+        // Validar que los datos requeridos estén presentes
+        if (!idMesaKaraoke || !datos || datos.length === 0) {
+            alert("Por favor, completa todos los campos.");
+            return;
+        }
+
+        // Crear el objeto de datos para enviar
+        const data = [
+            {
+                IdMesa: idMesaKaraoke,
+                Canciones: datos  // Aseguramos que cada canción esté limpia de espacios
+            }
+        ];
+
+        try {
+            // Realizar la solicitud POST con fetch
+            const response = await fetch('/Karaoke/EnviarFormulario', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)  // Enviar el array de canciones
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error en la solicitud: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            // Limpiar el campo de texto
+            inputElement.value = ""; // Limpiar el input
+            alert(result.message || "Formulario enviado con éxito.");
+        } catch (error) {
+            // Manejar errores
+            console.error("Error al enviar el formulario:", error);
+            alert("Hubo un problema al enviar el formulario. Por favor, inténtalo nuevamente.");
+        }
+    });
+
+</script>
+
+
 <style>
-
     .form-Panel {
-		display: flex;
-		flex-direction: column;
-		width: 70%;
-		margin: 0 auto;
-		gap: 10px;
+        display: flex;
+        flex-direction: column;
+        width: 70%;
+        margin: 0 auto;
+        gap: 10px;
     }
-
 </style>

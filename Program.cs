@@ -48,5 +48,10 @@ app.MapControllerRoute(
     name: "pedidoEnviar",
     pattern: "{controller=Pedido}/{action=EnviarPedido}/{carrito?}");
 
+app.MapControllerRoute(
+    name: "enviarFormulario",
+    pattern: "{controller=Karaoke}/{action=EnviarFormulario}/{data?}");
+
+
 
 app.Run();

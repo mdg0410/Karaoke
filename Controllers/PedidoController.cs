@@ -9,8 +9,6 @@ using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-
 
 
 namespace Karaoke.Controllers
@@ -29,6 +27,9 @@ namespace Karaoke.Controllers
         [HttpPost("EnviarPedido")]
         public async Task<IActionResult> EnviarPedido([FromBody] List<PedidoViewModel> carrito)
         {
+            var ListaCanciones = _context.CancionesMesas.ToList();
+
+
 
             if (carrito == null || !carrito.Any())
             {
