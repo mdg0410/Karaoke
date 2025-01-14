@@ -23,7 +23,8 @@
         if (response.ok) {
             localStorage.setItem('mesaCredencial', data.credencial);
             localStorage.setItem('idMesa', idMesa);
-            alert('Mesa validada con éxito');
+            alert('Mesa validada correctamente');
+            
         } else {
             alert(data.message || 'Error al validar la mesa post validar');
         }
@@ -31,4 +32,6 @@
         console.error('Error al validar la mesa: post validar catch', error);
         alert('Error al validar la mesa');
     }
+
+
 });

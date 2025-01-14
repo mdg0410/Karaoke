@@ -52,6 +52,6 @@ app.MapControllerRoute(
     name: "enviarFormulario",
     pattern: "{controller=Karaoke}/{action=EnviarFormulario}/{data?}");
 
-
+app.MapControllers();
 
 app.Run();

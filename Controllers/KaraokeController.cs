@@ -45,5 +45,30 @@ namespace Karaoke.Controllers
             return Ok(new { message = "Datos enviados correctamente" });
         }
 
+        [HttpGet("ObtenerCanciones")]
+        public async Task<IActionResult> ObtenerCanciones()
+        {
+            try
+            {
+                var canciones = await _context.CancionesMesas
+                    .Select(c => new
+                    {
+                        c.IdCancionMesa,
+                        c.IdMesa,
+                        c.Canciones,
+                        c.IdEstadoCancion,
+                        c.EstadoEspecial
+                    })
+                    .ToListAsync();
+
+                return Ok(canciones);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+
     }
 }

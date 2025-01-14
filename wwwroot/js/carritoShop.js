@@ -28,12 +28,15 @@
     };
 
     // Actualizar carrito en la interfaz
-    window.actualizarCarrito = function (isOpenCarShop = false) {
+    window.actualizarCarrito = async function (isOpenCarShop = false) {
         carritoBody.innerHTML = '';
+        await cargarCanciones();
         let total = 0;
+        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
         carrito.forEach((item, index) => {
             const itemTotal = item.precio * item.cantidad;
             total += itemTotal;
+            console.log('Item:', item);
             carritoBody.innerHTML += `
             <tr>
                 <td>${item.nombre}</td>
@@ -53,6 +56,78 @@
         carritoBadge.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0);
     };
 
+    const cargarCanciones = async function () {
+        try {
+            // Realizar el fetch para obtener las mesas
+            console.log('Cargando las canciones...');
+            const response = await fetch('https://localhost:7050/Karaoke/ObtenerCanciones', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Respuesta:', response);
+
+            if (!response.ok) {
+                alert('Error al cargar las canciones.');
+                return;
+            }
+
+            const canciones = await response.json();
+
+            // Verificar si hay un idMesa en el localStorage
+            let idMesa = localStorage.getItem('idMesa');
+
+            if (!idMesa) {
+                alert('No se encontró ninguna mesa asignada en el localStorage.');
+                return;
+            }
+
+            // Filtrar la mesa correspondiente con estado especial igual a 0
+            const cancionesFiltradas = canciones.filter(c => c.idMesa == idMesa && c.estadoEspecial === 0);
+
+            console.log('Canciones filtradas:', cancionesFiltradas);
+
+            if (cancionesFiltradas.length === 0) {
+                alert('No se encontró una mesa con estado especial 0.');
+                return;
+            }
+
+            // Obtener solo los idCancionMesa de las canciones filtradas
+            const detalle = cancionesFiltradas.map(c => c.idCancionMesa).join(',');
+
+            // Obtener el carrito actual del localStorage
+            let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+            console.log('Carrito:', carrito);
+
+            // Verificar si hay coincidencias en el carrito
+            const existeCancion = carrito.some(item => item.nombre === 'Canciones' && item.detalle === detalle);
+
+            if (existeCancion) {
+                console.log('Las canciones ya están en el carrito.');
+                return;
+            }
+
+            // Si no hay coincidencias, eliminar el item "Canciones" del carrito 
+            carrito = carrito.filter(item => item.nombre !== 'Canciones');
+
+            // Si no hay coincidencias, actualizar el carrito
+            carrito.push({ id: 23, nombre: 'Canciones', precio: 1.00, cantidad: cancionesFiltradas.length, detalle: detalle });
+
+            localStorage.setItem('carrito', JSON.stringify(carrito));
+
+            console.log('Canciones agregadas al carrito:', carrito);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Hubo un error al procesar las canciones.');
+        }
+    };
+
+
+
     // Función para manejar el OK de la respuesta
     window.handlePedidoOk = function () {
         localStorage.removeItem('carrito');
@@ -62,6 +137,7 @@
 
     // Mostrar carrito
     btnCarrito.addEventListener('click', function () {
+        console.log('Mostrando carrito...');
         carritoContainer.style.display = 'block';
     });
 

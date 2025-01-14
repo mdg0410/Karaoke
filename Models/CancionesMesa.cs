@@ -22,6 +22,8 @@ public partial class CancionesMesa
     [Column(TypeName = "datetime")]
     public DateTime FechaRegistro { get; set; }
 
+    public int? EstadoEspecial { get; set; }
+
     [ForeignKey("IdEstadoCancion")]
     [InverseProperty("CancionesMesas")]
     public virtual EstadosCancion IdEstadoCancionNavigation { get; set; } = null!;
