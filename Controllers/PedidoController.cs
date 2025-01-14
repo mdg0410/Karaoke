@@ -27,10 +27,8 @@ namespace Karaoke.Controllers
         }
 
         [HttpPost("EnviarPedido")]
-        public async Task<IActionResult> EnviarPedido([FromBody] List<Pedido> carrito)
+        public async Task<IActionResult> EnviarPedido([FromBody] List<PedidoViewModel> carrito)
         {
-
-            Console.WriteLine("Inicio del controlador");
 
             if (carrito == null || !carrito.Any())
             {
@@ -39,13 +37,15 @@ namespace Karaoke.Controllers
 
             var codigoPedido = GenerarCodigoPedido(6);
 
-            //var certificados = carrito.Select(carrito => carrito.MesaCredencial).ToList();
+            var certificados = carrito.Select(carrito => carrito.Credencial).ToList();
             //var validarCertificado = await _context.Mesas.FirstOrDefaultAsync(m => certificados.Contains(m.Credencial));
 
             //if (validarCertificado == null)
             //{
             //    return NotFound("Certificado no encontrado");
             //}
+
+            Console.WriteLine(certificados);
 
             foreach (var producto in carrito)
             {
@@ -65,7 +65,6 @@ namespace Karaoke.Controllers
                 _context.Database.CloseConnection();
             }
 
-            Console.WriteLine("Final del controlador");
             return Ok("Pedido enviado correctamente");
         }
 

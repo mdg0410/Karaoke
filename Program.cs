@@ -8,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<KaraokeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
+
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -36,6 +43,10 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "mesaValidar",
     pattern: "{controller=Mesa}/{action=Validar}/{idMesa?}");
+
+app.MapControllerRoute(
+    name: "pedidoEnviar",
+    pattern: "{controller=Pedido}/{action=EnviarPedido}/{carrito?}");
 
 
 app.Run();

@@ -1,13 +1,12 @@
-﻿@model List<Producto>
+﻿@model Karaoke.ViewModels.MenuProductosViewModel
 
 <h1 class="text-center my-4">Menú de Productos</h1>
 
 <div class="container py-4">
-    @foreach (var categoria in Model.GroupBy(p => p.Categoria).Select((group, index) => new { Group = group, Index = index }))
+    @foreach (var categoria in Model.Productos.GroupBy(p => p.Categoria).Select((group, index) => new { Group = group, Index = index }))
     {
         <div class="mb-3">
-            <h2 class="accordion-header text-center text-uppercase" style="color: #ffcc00; cursor: pointer;"
-                data-target="#category-@categoria.Index">
+            <h2 class="accordion-header text-center text-uppercase" style="color: #ffcc00; cursor: pointer;" data-target="#category-@categoria.Index">
                 @categoria.Group.Key
             </h2>
 
@@ -19,12 +18,13 @@
                             <div class="card h-100 shadow">
                                 <img src="~/img/@producto.ImagenURL" class="card-img-top" alt="@producto.Nombre" style="height: 200px; object-fit: cover;">
                                 <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title text-center">@producto.Nombre</h5>
+                                    <h5 class="card-title text-center">@producto.Nombre - @producto.IdProducto</h5>
                                     <p class="card-text text-center text-muted">@producto.Precio.ToString("C")</p>
                                     <button class="btn btn-outline-light w-100 agregar-carrito"
                                             data-id="@producto.IdProducto"
                                             data-nombre="@producto.Nombre"
-                                            data-precio="@producto.Precio">
+                                            data-precio="@producto.Precio"
+                                            data-requiere-opcion="@((new int[] { 1, 2, 3, 4, 5, 6, 11, 28 }).Contains(producto.IdProducto) ? "true" : "false")">
                                         Agregar al carrito
                                     </button>
                                 </div>
@@ -43,7 +43,6 @@
     <span id="carritoBadge" class="carrito-badge">0</span>
 </button>
 
-
 <!-- Carrito flotante -->
 <div id="carritoContainer" class="carrito-flotante">
     <div class="carrito-header">
@@ -53,6 +52,7 @@
         <thead>
             <tr>
                 <th>Producto</th>
+                <th>Detalles</th>
                 <th>Cantidad</th>
                 <th>Precio Unitario</th>
                 <th>Total</th>
@@ -65,366 +65,42 @@
     <button class="btn btn-primary w-100 my-3" id="btnEnviarPedido">Enviar Pedido</button>
 </div>
 
-<!-- CSS -->
-<style>
-    body {
-        background-color: #1e1e1e;
-        color: #dcdcdc;
-        font-family: 'Poppins', sans-serif;
-    }
+<!-- Modal para seleccionar opciones adicionales -->
+<div class="modal fade" id="opcionesModal" tabindex="-1" aria-labelledby="opcionesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="opcionesModalLabel">Seleccionar Opción</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="opcionesContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="guardarOpcion">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    h1, h2 {
-        color: #ffcc00;
-    }
+<!-- Modal para mostrar pedidos -->
+<div class="modal fade" id="pedidosModal" tabindex="-1" aria-labelledby="pedidosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pedidosModalLabel">Pedidos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="pedidosContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    .card {
-        background-color: #2a2a2a;
-        border: 1px solid #444;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+<!-- Estilos personalizados -->
+<link rel="stylesheet" href="~/css/carrito.css">
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
-    }
-
-    .btn-outline-light {
-        border-color: #ffcc00;
-        color: #ffcc00;
-    }
-
-    .btn-outline-light:hover {
-        background-color: #ffcc00;
-        color: #121212;
-        border-color: #ffcc00;
-    }
-
-    h2 {
-        padding: 0.5rem;
-        background-color: #2a2a2a;
-        border: 1px solid #444;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-        margin-bottom: 0;
-    }
-
-    h2:hover {
-        background-color: #444;
-    }
-
-    .accordion-content {
-        display: none;
-        padding: 10px;
-        background-color: #333;
-        border-radius: 0 0 5px 5px;
-    }
-
-    .accordion-content.show {
-        display: block;
-    }
-
-    .btn-float {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background-color: #ffcc00;
-        border: none;
-        color: #1e1e1e;
-        padding: 12px;
-        border-radius: 50%;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        cursor: pointer;
-        transition: background-color 0.3s;
-        z-index: 9999;
-    }
-
-    .btn-float img {
-        max-width: 40px;
-        max-height: 40px;
-		cursor: pointer;
-    }
-
-    .btn-float:hover {
-        background-color: #d4af37;
-    }
-
-    /* CSS para el contador del carrito */
-    .carrito-badge {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background-color: #ff0000;
-        color: white;
-        border-radius: 50%;
-        padding: 3px 8px;
-        font-size: 12px;
-        z-index: 10000;
-    }
-
-
-    .carrito-flotante {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.9);
-        color: #fff;
-        z-index: 9999;
-        padding: 40px;
-        box-sizing: border-box;
-        overflow-y: auto;
-    }
-
-    .carrito-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .cerrar-carrito {
-        background: none;
-        border: none;
-        color: #ffcc00;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-
-    .table {
-        margin-top: 20px;
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .table th,
-    .table td {
-        text-align: center;
-        border-bottom: 1px solid #444;
-    }
-
-    .table th {
-        border-top: 1px solid #444;
-        border-bottom: 2px solid #444;
-        padding: 8px;
-    }
-
-    .table td {
-        padding: 8px;
-        vertical-align: middle;
-    }
-</style>
-
-
-
-<script>
-
-    //Validacion de mesas con el controlador MesaController
-    document.addEventListener('DOMContentLoaded', async function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const idMesa = urlParams.get('idMesa');
-
-		if(localStorage.getItem('idMesa')){
-			return;
-		}
-        
-        if (!idMesa) {
-            alert('ID de mesa no proporcionado');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/Mesa/Validar/${idMesa}`, {
-                method: 'POST',
-            });
-
-            const data = await response.json();
-
-            console.log(data);
-
-            if (response.ok) {
-                localStorage.setItem('mesaCredencial', data.credencial);
-                localStorage.setItem('idMesa', idMesa);
-                alert('Mesa validada con éxito');
-            } else {
-                alert(data.message || 'Error al validar la mesa post validar');
-            }
-        } catch (error) {
-            console.error('Error al validar la mesa: post validar catch', error);
-            alert('Error al validar la mesa');
-        }
-    });
-
-    //Funciones y logica del carrito
-    document.addEventListener('DOMContentLoaded', function () {
-        const carritoContainer = document.getElementById('carritoContainer');
-        const btnCarrito = document.getElementById('btnCarritoImg');
-        const cerrarCarrito = document.querySelector('.cerrar-carrito');
-        const headers = document.querySelectorAll('.accordion-header');
-        const carritoBody = document.getElementById('carritoBody');
-        const carritoTotal = document.getElementById('carritoTotal');
-        const btnEnviarPedido = document.getElementById('btnEnviarPedido');
-        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-        const carritoBadge = document.getElementById('carritoBadge');
-
-        // Actualizar carrito en la interfaz
-        function actualizarCarrito() {
-            carritoBody.innerHTML = '';
-            let total = 0;
-
-            carrito.forEach((item, index) => {
-                const itemTotal = item.precio * item.cantidad;
-                total += itemTotal;
-
-                carritoBody.innerHTML += `
-                    <tr>
-                        <td>${item.nombre}</td>
-                        <td>${item.cantidad}</td>
-                        <td>${item.precio.toFixed(2)}</td>
-                        <td>${itemTotal.toFixed(2)}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${index})">X</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            carritoTotal.textContent = total.toFixed(2);
-            carritoContainer.style.display = 'block'; // Ensure carrito remains open
-            localStorage.setItem('carrito', JSON.stringify(carrito));
-
-            carrito.length;
-            carritoBadge.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0); // Sumamos todos los items
-        }
-
-        // Mostrar carrito
-        btnCarrito.addEventListener('click', function () {
-            carritoContainer.style.display = 'block';
-        });
-
-        // Cerrar carrito al hacer clic en la "X"
-        cerrarCarrito.addEventListener('click', function () {
-            carritoContainer.style.display = 'none';
-        });
-
-        // Cerrar carrito al hacer clic fuera del carrito
-        document.addEventListener('click', function (event) {
-            if (!carritoContainer.contains(event.target) && event.target !== btnCarrito) {
-                carritoContainer.style.display = 'none';
-            }
-        });
-
-        // Detener cierre del carrito al eliminar un ítem
-        carritoContainer.addEventListener('click', function (event) {
-            event.stopPropagation();
-        });
-
-        // Agregar producto al carrito
-        document.querySelectorAll('.agregar-carrito').forEach(button => {
-            button.addEventListener('click', function () {
-                const id = button.getAttribute('data-id');
-                const nombre = button.getAttribute('data-nombre');
-                const precio = parseFloat(button.getAttribute('data-precio'));
-
-                const productoExistente = carrito.find(item => item.id === id);
-
-                if (productoExistente) {
-                    productoExistente.cantidad += 1;
-                } else {
-                    carrito.push({ id, nombre, precio, cantidad: 1 });
-                }
-
-                actualizarCarrito();
-            });
-        });
-
-
-        // Eliminar producto del carrito
-        window.eliminarProducto = function (index) {
-            carrito.splice(index, 1);
-            actualizarCarrito();
-        };
-
-        // Inicializar carrito
-        actualizarCarrito();
-
-        // Lógica de los encabezados de acordeón
-        headers.forEach(header => {
-            header.addEventListener('click', function () {
-                // Obtener el contenido objetivo
-                const targetId = this.getAttribute('data-target');
-                const target = document.querySelector(targetId);
-
-                // Cerrar cualquier contenido actualmente abierto
-                document.querySelectorAll('.accordion-content').forEach(content => {
-                    if (content !== target) {
-                        content.classList.remove('show');
-                    }
-                });
-                                // Alternar la visibilidad del contenido actual
-                target.classList.toggle('show');
-            });
-        });
-
-        // Enviar pedido
-        btnEnviarPedido.addEventListener('click', function () {
-            // Aquí puedes añadir la lógica para enviar el pedido
-            alert('Pedido enviado!');
-            carrito = []; // Limpiar el carrito
-            actualizarCarrito(); // Actualizar el carrito en la interfaz
-        });
-
-        // Asegurarnos de que el carrito no se muestre al cargar la página
-        carritoContainer.style.display = 'none';
-    });
-
-    //
-    btnEnviarPedido.addEventListener('click', async function () {
-        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-        const idMesa = localStorage.getItem('idMesa');
-        const mesaCredencial = localStorage.getItem('mesaCredencial');
-
-        if (carrito.length === 0) {
-            alert('El carrito está vacío');
-            return;
-        }
-
-        if (!idMesa || !mesaCredencial) {
-            alert('No se ha validado la mesa');
-            return;
-        }
-
-        try {
-            const data = carrito.map(item => ({
-                IdMesa: idMesa,
-                IdProducto: item.id,
-                Cantidad: item.cantidad,
-                DetalleAdicional: 'Detalles adicionales aquí',
-                Credencial: mesaCredencial,
-            }));
-
-            const response = await fetch('/Pedido/EnviarPedido', {
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.ok) {
-                alert('Pedido enviado!');
-                localStorage.removeItem('carrito');
-                actualizarCarrito();
-            } else {
-                alert('Error al enviar el pedido');
-            }
-        } catch (error) {
-            console.error('Error al enviar el pedido:', error);
-            alert('Error al enviar el pedido');
-        }
-    });
-
-
-</script>
-
+<!-- Scripts -->
+<script src="~/js/carritoShop.js"></script>
+<script src="~/js/validarMesa.js"></script>

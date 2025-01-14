@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Karaoke.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace Karaoke.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 public partial class Pedido
 {
@@ -34,15 +31,15 @@ public partial class Pedido
 
     [ForeignKey("IdEstadoPedido")]
     [InverseProperty("Pedidos")]
-    public virtual EstadosPedido IdEstadoPedidoNavigation { get; set; } = null!;
+    public virtual EstadosPedido? IdEstadoPedidoNavigation { get; set; }
 
     [ForeignKey("IdMesa")]
     [InverseProperty("Pedidos")]
-    public virtual Mesa IdMesaNavigation { get; set; } = null!;
+    public virtual Mesa? IdMesaNavigation { get; set; }
 
     [ForeignKey("IdProducto")]
     [InverseProperty("Pedidos")]
-    public virtual Producto IdProductoNavigation { get; set; } = null!;
+    public virtual Producto? IdProductoNavigation { get; set; }
 
     [ForeignKey("IdTrabajador")]
     [InverseProperty("Pedidos")]

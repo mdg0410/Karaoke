@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Karaoke.Data;
 using Karaoke.Models;
+using Karaoke.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Karaoke.Controllers
@@ -22,7 +23,15 @@ namespace Karaoke.Controllers
         public IActionResult MenuProductos()
         {
             var productos = _context.Productos.ToList(); // Supongamos que tienes una tabla llamada "Productos"
-            return View(productos);
+            var pedidos = _context.Pedidos.ToList(); // Supongamos que tienes una tabla llamada "Pedidos"
+
+            var viewModel = new MenuProductosViewModel
+            {
+                Productos = productos,
+                Pedidos = pedidos
+            };  
+
+            return View(viewModel);
         }
 
         public IActionResult Cancionero()
