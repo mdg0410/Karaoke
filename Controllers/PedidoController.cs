@@ -15,7 +15,7 @@ namespace Karaoke.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PedidoController : ControllerBase
+    public class PedidoController : Controller
     {
         private readonly KaraokeContext _context;
 
@@ -29,7 +29,7 @@ namespace Karaoke.Controllers
         [HttpPost("EnviarPedido")]
         public async Task<IActionResult> EnviarPedido([FromBody] List<PedidoViewModel> carrito)
         {
-
+            
             if (carrito == null || !carrito.Any())
             {
                 return BadRequest("El carro de compras está vacío");
@@ -46,29 +46,32 @@ namespace Karaoke.Controllers
                 return NotFound("Certificado no encontrado");
             }
 
-            foreach (var producto in carrito)
-            {
-                // Validar si el producto es una canción
-                // Si es una canción, se actualiza el estado especial de la canción a 2
-                if (producto.IdMesa == 23 && !string.IsNullOrEmpty(producto.DetalleAdicional))
+                foreach (var producto in carrito)
                 {
-                    var detalles = producto.DetalleAdicional.Split(',');
-                    foreach (var item in detalles)
+                    // Validar si el producto es una canción
+                    // Si es una canción, se actualiza el estado especial de la canción a 2
+                    if (producto.IdProducto == 23 && !string.IsNullOrEmpty(producto.DetalleAdicional))
                     {
-                        if (int.TryParse(item.Trim(), out int idCancionMesa))
+                        var detalles = producto.DetalleAdicional.Split(',');
+                        foreach (var item in detalles)
                         {
-                            var cancionMesa = await _context.CancionesMesas.FindAsync(idCancionMesa);
-                            if (cancionMesa != null)
+                            if (int.TryParse(item.Trim(), out int idCancionMesa))
                             {
-                                cancionMesa.EstadoEspecial = 2;
-                                _context.CancionesMesas.Update(cancionMesa);
+                                var cancionMesa = await _context.CancionesMesas.FindAsync(idCancionMesa);
+                                if (cancionMesa != null)
+                                {
+                                    cancionMesa.EstadoEspecial = 2;
+                                    _context.CancionesMesas.Update(cancionMesa);
+                                }
                             }
                         }
+                        await _context.SaveChangesAsync();
                     }
-                    await _context.SaveChangesAsync();
                 }
 
 
+            foreach (var producto in carrito)
+            {
                 var cmd = _context.Database.GetDbConnection().CreateCommand();
                 cmd.CommandText = "InsertarPedido";
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -84,6 +87,7 @@ namespace Karaoke.Controllers
                 await cmd.ExecuteNonQueryAsync();
                 _context.Database.CloseConnection();
             }
+            Console.WriteLine("Pedido enviado correctamente");
 
             return Ok("Pedido enviado correctamente");
         }

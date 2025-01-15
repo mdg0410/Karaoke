@@ -24,7 +24,6 @@
         carrito.forEach((item, index) => {
             const itemTotal = item.precio * item.cantidad;
             total += itemTotal;
-            console.log('Item:', item);
             carritoBody.innerHTML += `
             <tr>
                 <td>${item.nombre}</td>
@@ -105,9 +104,12 @@
             const precio = parseFloat(button.getAttribute('data-precio'));
 
             if (requiereOpcion) {
-                productoTemporal = { id, nombre, precio, cantidad: 1, detalle: '' };
                 opcionesContainer.innerHTML = opcionesPorProducto[id].map(opcion => `
-                    <button class="btn btn-outline-secondary opcion-producto" data-opcion="${opcion}">${opcion}</button>
+                <button class="btn btn-outline-secondary opcion-producto" 
+                        data-id="${id}" 
+                        data-nombre="${nombre}" 
+                        data-precio="${precio}" 
+                        data-opcion="${opcion}">${opcion}</button>
                 `).join('');
                 opcionesModal.show();
             } else {
@@ -174,7 +176,6 @@
 
     // Mostrar carrito 
     btnCarrito.addEventListener('click', async function () {
-        console.log('Mostrando carrito...');
         await actualizarCarrito(); 
         carritoContainer.style.display = 'block';
     });
@@ -208,18 +209,17 @@
         if (event.target.classList.contains('opcion-producto')) {
             document.querySelectorAll('.opcion-producto').forEach(button => button.classList.remove('selected'));
             event.target.classList.add('selected');
-        }
-    });
 
-    document.getElementById('guardarOpcion').addEventListener('click', function () {
-        const opcionSeleccionada = document.querySelector('.opcion-producto.selected');
-        if (opcionSeleccionada) {
-            productoTemporal.detalle = opcionSeleccionada.getAttribute('data-opcion');
-            agregarProductoAlCarrito(productoTemporal.id, productoTemporal.nombre, productoTemporal.precio, productoTemporal.detalle);
+            // Obtener la información del producto del botón que abrió el modal
+            const id = parseInt(event.target.getAttribute('data-id'));
+            const nombre = event.target.getAttribute('data-nombre');
+            const precio = parseFloat(event.target.getAttribute('data-precio'));
+            const detalle = event.target.getAttribute('data-opcion');
+
+            // Agregar el producto al carrito con la opción seleccionada
+            agregarProductoAlCarrito(id, nombre, precio, detalle);
             actualizarCarrito();
             opcionesModal.hide();
-        } else {
-            alert('Por favor selecciona una opción antes de guardar.');
         }
     });
 
