@@ -12,27 +12,15 @@
     const carritoBadge = document.getElementById('carritoBadge');
     let productoTemporal = {};
 
-    const opcionesPorProducto = {
-        1: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister', 'Laguna azul', 'Padrino', 'Caipirinha', 'Piña colada'],
-        2: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister'],
-        3: ['Limón', 'Mojito', 'Maracuyá'],
-        4: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister'],
-        5: ['Limón', 'Mojito', 'Maracuyá'],
-        6: ['Limón', 'Mojito', 'Maracuyá'],
-        11: ['Salchipapa', 'PapiCarne'],
-        28: ['Gas', 'Sin gas']
-    };
-
-    window.RequiereOpcionAdicional = function (idProducto) {
-        return opcionesPorProducto.hasOwnProperty(idProducto);
-    };
-
     // Actualizar carrito en la interfaz
     window.actualizarCarrito = async function (isOpenCarShop = false) {
         carritoBody.innerHTML = '';
         await cargarCanciones();
-        let total = 0;
-        let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+
+        carrito = JSON.parse(localStorage.getItem('carrito')) || []; // Obtener el carrito actualizado
+
+        let total = 0;       
+
         carrito.forEach((item, index) => {
             const itemTotal = item.precio * item.cantidad;
             total += itemTotal;
@@ -58,7 +46,6 @@
 
     const cargarCanciones = async function () {
         try {
-            // Realizar el fetch para obtener las mesas
             console.log('Cargando las canciones...');
             const response = await fetch('https://localhost:7050/Karaoke/ObtenerCanciones', {
                 method: 'GET',
@@ -76,7 +63,6 @@
 
             const canciones = await response.json();
 
-            // Verificar si hay un idMesa en el localStorage
             let idMesa = localStorage.getItem('idMesa');
 
             if (!idMesa) {
@@ -84,7 +70,6 @@
                 return;
             }
 
-            // Filtrar la mesa correspondiente con estado especial igual a 0
             const cancionesFiltradas = canciones.filter(c => c.idMesa == idMesa && c.estadoEspecial === 0);
 
             console.log('Canciones filtradas:', cancionesFiltradas);
@@ -94,15 +79,12 @@
                 return;
             }
 
-            // Obtener solo los idCancionMesa de las canciones filtradas
             const detalle = cancionesFiltradas.map(c => c.idCancionMesa).join(',');
 
-            // Obtener el carrito actual del localStorage
             let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
             console.log('Carrito:', carrito);
 
-            // Verificar si hay coincidencias en el carrito
             const existeCancion = carrito.some(item => item.nombre === 'Canciones' && item.detalle === detalle);
 
             if (existeCancion) {
@@ -110,10 +92,8 @@
                 return;
             }
 
-            // Si no hay coincidencias, eliminar el item "Canciones" del carrito 
             carrito = carrito.filter(item => item.nombre !== 'Canciones');
 
-            // Si no hay coincidencias, actualizar el carrito
             carrito.push({ id: 23, nombre: 'Canciones', precio: 1.00, cantidad: cancionesFiltradas.length, detalle: detalle });
 
             localStorage.setItem('carrito', JSON.stringify(carrito));
@@ -126,31 +106,6 @@
         }
     };
 
-
-
-    // Función para manejar el OK de la respuesta
-    window.handlePedidoOk = function () {
-        localStorage.removeItem('carrito');
-        carrito = [];
-        actualizarCarrito();
-    };
-
-    // Mostrar carrito
-    btnCarrito.addEventListener('click', function () {
-        console.log('Mostrando carrito...');
-        carritoContainer.style.display = 'block';
-    });
-
-    // Cerrar carrito al hacer clic en la "X"
-    cerrarCarrito.addEventListener('click', function () {
-        carritoContainer.style.display = 'none';
-    });
-
-    // Cerrar carrito al hacer clic fuera del carrito
-    carritoContainer.addEventListener('click', function (event) {
-        event.stopPropagation();
-    });
-
     // Agregar producto al carrito
     document.querySelectorAll('.agregar-carrito').forEach(button => {
         button.addEventListener('click', function () {
@@ -160,47 +115,32 @@
             const precio = parseFloat(button.getAttribute('data-precio'));
 
             if (requiereOpcion) {
-                // Si el producto requiere opción, mostramos el modal
-                productoTemporal = { id, nombre, precio, cantidad: 1, detalle: 'Vacio' };
+                productoTemporal = { id, nombre, precio, cantidad: 1, detalle: '' };
                 opcionesContainer.innerHTML = opcionesPorProducto[id].map(opcion => `
-                    <button class="btn btn-outline-secondary opcion-producto" data-opcion="${opcion.charAt(2)}">${opcion}</button>
+                    <button class="btn btn-outline-secondary opcion-producto" data-opcion="${opcion}">${opcion}</button>
                 `).join('');
                 opcionesModal.show();
             } else {
-                // Si no requiere opción, lo agregamos directamente al carrito
-                const productoExistente = carrito.find(item => item.id === id);
-                if (productoExistente) {
-                    productoExistente.cantidad += 1;
-                } else {
-                    carrito.push({ id, nombre, precio, cantidad: 1, detalle: 'Vacio' });
-                }
+                agregarProductoAlCarrito(id, nombre, precio, ''); // Agregar el producto directamente si no requiere opción
                 actualizarCarrito();
             }
         });
     });
 
-    document.getElementById('guardarOpcion').addEventListener('click', function () {
-        const opcionSeleccionada = document.querySelector('.opcion-producto.selected');
-        if (opcionSeleccionada) {
-            productoTemporal.detalle = opcionSeleccionada.getAttribute('data-opcion');
-            const productoExistente = carrito.find(item => item.id === productoTemporal.id);
-            if (productoExistente) {
-                productoExistente.cantidad += 1;
-                productoExistente.detalle += `, ${productoTemporal.detalle}`;
-            } else {
-                carrito.push(productoTemporal);
+    // Función para agregar producto al carrito
+    function agregarProductoAlCarrito(id, nombre, precio, detalle) {
+        const productoExistente = carrito.find(item => item.id === id);
+        if (productoExistente) {
+            productoExistente.cantidad += 1;
+            if (detalle) {
+                productoExistente.detalle += `, ${detalle}`;
             }
-            actualizarCarrito();
-            opcionesModal.hide();  // Cierra el modal después de guardar la opción
+        } else {
+            carrito.push({ id, nombre, precio, cantidad: 1, detalle });
         }
-    });
+        localStorage.setItem('carrito', JSON.stringify(carrito)); // Guardar el carrito actualizado en localStorage
+    }
 
-    document.addEventListener('click', function (event) {
-        if (event.target.classList.contains('opcion-producto')) {
-            document.querySelectorAll('.opcion-producto').forEach(button => button.classList.remove('selected'));
-            event.target.classList.add('selected');
-        }
-    });
 
     // Función para eliminar producto del carrito
     window.eliminarProducto = function (index, idProducto) {
@@ -218,11 +158,8 @@
         } else {
             carrito.splice(index, 1);
         }
-        if (carrito.length === 0) {
-            actualizarCarrito();
-        } else {
-            actualizarCarrito(true);
-        }
+        localStorage.setItem('carrito', JSON.stringify(carrito)); // Guardar el carrito actualizado en localStorage
+        actualizarCarrito(true);
     };
 
     // Inicializar carrito
@@ -244,6 +181,65 @@
             target.classList.toggle('show');
         });
     });
+
+    // Mostrar carrito 
+    btnCarrito.addEventListener('click', async function () {
+        console.log('Mostrando carrito...');
+        await actualizarCarrito(); // Asegurarse de cargar y actualizar el carrito correctamente 
+        carritoContainer.style.display = 'block';
+    });
+
+    // Cerrar carrito al hacer clic en la "X"
+    cerrarCarrito.addEventListener('click', function () {
+        carritoContainer.style.display = 'none';
+    });
+
+    // Cerrar carrito al hacer clic fuera del carrito
+    carritoContainer.addEventListener('click', function (event) {
+        event.stopPropagation();
+    });
+
+    const opcionesPorProducto = {
+        1: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister', 'Laguna azul', 'Padrino', 'Caipirinha', 'Piña colada'],
+        2: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister'],
+        3: ['Limón', 'Mojito', 'Maracuyá'],
+        4: ['Margarita', 'Mojito', 'Sexo en la playa', 'Jagermeister'],
+        5: ['Limón', 'Mojito', 'Maracuyá'],
+        6: ['Limón', 'Mojito', 'Maracuyá'],
+        11: ['Salchipapa', 'PapiCarne'],
+        28: ['Gas', 'Sin gas']
+    };
+
+    window.RequiereOpcionAdicional = function (idProducto) {
+        return opcionesPorProducto.hasOwnProperty(idProducto);
+    };
+
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('opcion-producto')) {
+            document.querySelectorAll('.opcion-producto').forEach(button => button.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+    });
+
+    document.getElementById('guardarOpcion').addEventListener('click', function () {
+        const opcionSeleccionada = document.querySelector('.opcion-producto.selected');
+        if (opcionSeleccionada) {
+            productoTemporal.detalle = opcionSeleccionada.getAttribute('data-opcion');
+            agregarProductoAlCarrito(productoTemporal.id, productoTemporal.nombre, productoTemporal.precio, productoTemporal.detalle);
+            actualizarCarrito();
+            opcionesModal.hide();  // Cierra el modal después de guardar la opción
+        } else {
+            alert('Por favor selecciona una opción antes de guardar.');
+        }
+    });
+
+
+    // Función para manejar el OK de la respuesta
+    window.handlePedidoOk = function () {
+        localStorage.removeItem('carrito');
+        carrito = [];
+        actualizarCarrito();
+    };
 
     // Enviar pedido
     btnEnviarPedido.addEventListener('click', function () {
