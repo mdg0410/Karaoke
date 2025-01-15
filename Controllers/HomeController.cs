@@ -25,8 +25,8 @@ namespace Karaoke.Controllers
         }
         public IActionResult MenuProductos()
         {
-            var productos = _context.Productos.ToList(); // Supongamos que tienes una tabla llamada "Productos"
-            var pedidos = _context.Pedidos.ToList(); // Supongamos que tienes una tabla llamada "Pedidos"
+            var productos = _context.Productos.ToList();
+            var pedidos = _context.Pedidos.ToList();
 
             var viewModel = new MenuProductosViewModel
             {

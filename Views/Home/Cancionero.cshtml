@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Cancionero";
+}
+
+<div id="qr-section">
+    <h2>Escanea el Código QR</h2>
+    <img src="/images/qr-cancionero.png" alt="Código QR para el Cancionero" style="width: 200px; height: 200px;">
+</div>
+
+<!-- Botón para redirigir al PDF en Google Drive -->
+<div id="download-button">
+    <button onclick="window.open('https://drive.google.com/file/d/tu-archivo-id/view', '_blank')">
+        Ver y Descargar Cancionero
+    </button>
+</div>
+
+<style>
+    
+    #qr-section {
+        margin: 20px 0;
+    }
+
+    #download-button {
+        margin-top: 20px;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+</style>

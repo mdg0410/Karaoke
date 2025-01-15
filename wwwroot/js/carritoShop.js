@@ -17,7 +17,7 @@
         carritoBody.innerHTML = '';
         await cargarCanciones();
 
-        carrito = JSON.parse(localStorage.getItem('carrito')) || []; // Obtener el carrito actualizado
+        carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
         let total = 0;       
 
@@ -44,17 +44,15 @@
         carritoBadge.textContent = carrito.reduce((acc, item) => acc + item.cantidad, 0);
     };
 
+    //Cargar canciones en el carrito
     const cargarCanciones = async function () {
         try {
-            console.log('Cargando las canciones...');
             const response = await fetch('https://localhost:7050/Karaoke/ObtenerCanciones', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-
-            console.log('Respuesta:', response);
 
             if (!response.ok) {
                 alert('Error al cargar las canciones.');
@@ -72,10 +70,7 @@
 
             const cancionesFiltradas = canciones.filter(c => c.idMesa == idMesa && c.estadoEspecial === 0);
 
-            console.log('Canciones filtradas:', cancionesFiltradas);
-
             if (cancionesFiltradas.length === 0) {
-                alert('No se encontró una mesa con estado especial 0.');
                 return;
             }
 
@@ -83,12 +78,9 @@
 
             let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
 
-            console.log('Carrito:', carrito);
-
             const existeCancion = carrito.some(item => item.nombre === 'Canciones' && item.detalle === detalle);
 
             if (existeCancion) {
-                console.log('Las canciones ya están en el carrito.');
                 return;
             }
 
@@ -97,8 +89,6 @@
             carrito.push({ id: 23, nombre: 'Canciones', precio: 1.00, cantidad: cancionesFiltradas.length, detalle: detalle });
 
             localStorage.setItem('carrito', JSON.stringify(carrito));
-
-            console.log('Canciones agregadas al carrito:', carrito);
 
         } catch (error) {
             console.error('Error:', error);
@@ -121,7 +111,7 @@
                 `).join('');
                 opcionesModal.show();
             } else {
-                agregarProductoAlCarrito(id, nombre, precio, ''); // Agregar el producto directamente si no requiere opción
+                agregarProductoAlCarrito(id, nombre, precio, '');
                 actualizarCarrito();
             }
         });
@@ -138,7 +128,7 @@
         } else {
             carrito.push({ id, nombre, precio, cantidad: 1, detalle });
         }
-        localStorage.setItem('carrito', JSON.stringify(carrito)); // Guardar el carrito actualizado en localStorage
+        localStorage.setItem('carrito', JSON.stringify(carrito));
     }
 
 
@@ -158,7 +148,7 @@
         } else {
             carrito.splice(index, 1);
         }
-        localStorage.setItem('carrito', JSON.stringify(carrito)); // Guardar el carrito actualizado en localStorage
+        localStorage.setItem('carrito', JSON.stringify(carrito));
         actualizarCarrito(true);
     };
 
@@ -185,7 +175,7 @@
     // Mostrar carrito 
     btnCarrito.addEventListener('click', async function () {
         console.log('Mostrando carrito...');
-        await actualizarCarrito(); // Asegurarse de cargar y actualizar el carrito correctamente 
+        await actualizarCarrito(); 
         carritoContainer.style.display = 'block';
     });
 
@@ -227,7 +217,7 @@
             productoTemporal.detalle = opcionSeleccionada.getAttribute('data-opcion');
             agregarProductoAlCarrito(productoTemporal.id, productoTemporal.nombre, productoTemporal.precio, productoTemporal.detalle);
             actualizarCarrito();
-            opcionesModal.hide();  // Cierra el modal después de guardar la opción
+            opcionesModal.hide();
         } else {
             alert('Por favor selecciona una opción antes de guardar.');
         }
@@ -251,7 +241,7 @@
 
         // Convertir datos del carrito al formato necesario para PedidoViewModel
         const carritoTransformado = carrito.map(item => ({
-            IdMesa: localStorage.getItem('idMesa'), // Asigna el valor correcto de IdMesa
+            IdMesa: localStorage.getItem('idMesa'),
             IdProducto: parseInt(item.id),
             Cantidad: item.cantidad,
             DetalleAdicional: item.detalle,

@@ -98,13 +98,16 @@ h2 {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    max-width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.9);
     color: #fff;
     z-index: 9999;
-    padding: 40px;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    overflow-x: auto;
     overflow-y: auto;
 }
 
@@ -112,37 +115,44 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
 }
 
 .cerrar-carrito {
     background: none;
     border: none;
-    color: #ffcc00;
-    font-size: 1.5rem;
+    color: #fff;
+    font-size: 1.2rem;
     cursor: pointer;
 }
 
 .table {
-    margin-top: 20px;
-    border-collapse: separate;
-    border-spacing: 0;
     width: 100%;
-    max-width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
 }
 
-    .table th,
-    .table td {
-        text-align: center;
-        border-bottom: 1px solid #444;
-    }
-
-    .table th {
-        border-top: 1px solid #444;
-        border-bottom: 2px solid #444;
-        padding: 8px;
+    .table th, .table td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .table td {
-        padding: 8px;
-        vertical-align: middle;
+        white-space: normal;
+    }
+
+.text-end {
+    text-align: end;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
     }

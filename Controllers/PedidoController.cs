@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Data;
 using Karaoke.Data;
-using Karaoke.Models;
 using Karaoke.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Data;
 using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+//using System;
+//using System.Linq;
+//using Karaoke.Models;
+//using System.Threading.Tasks;
+//using System.Collections.Generic;
 
 namespace Karaoke.Controllers
 {
@@ -23,13 +23,12 @@ namespace Karaoke.Controllers
         {
             _context = context;
         }
-
+     
+        // Método para enviar el pedido. Parametros esperados: IdMesa, IdProducto, Cantidad, DetalleAdicional, Credencial
+        // Salida: Mensaje de confirmación
         [HttpPost("EnviarPedido")]
         public async Task<IActionResult> EnviarPedido([FromBody] List<PedidoViewModel> carrito)
         {
-            var ListaCanciones = _context.CancionesMesas.ToList();
-
-
 
             if (carrito == null || !carrito.Any())
             {
@@ -39,17 +38,37 @@ namespace Karaoke.Controllers
             var codigoPedido = GenerarCodigoPedido(6);
 
             var certificados = carrito.Select(carrito => carrito.Credencial).ToList();
-            //var validarCertificado = await _context.Mesas.FirstOrDefaultAsync(m => certificados.Contains(m.Credencial));
+            var validarCertificado = await _context.Mesas.FirstOrDefaultAsync(m => certificados.Contains(m.Credencial));
 
-            //if (validarCertificado == null)
-            //{
-            //    return NotFound("Certificado no encontrado");
-            //}
-
-            Console.WriteLine(certificados);
+            if (validarCertificado == null)
+            {
+                Console.WriteLine("Certificado no encontrado");
+                return NotFound("Certificado no encontrado");
+            }
 
             foreach (var producto in carrito)
             {
+                // Validar si el producto es una canción
+                // Si es una canción, se actualiza el estado especial de la canción a 2
+                if (producto.IdMesa == 23 && !string.IsNullOrEmpty(producto.DetalleAdicional))
+                {
+                    var detalles = producto.DetalleAdicional.Split(',');
+                    foreach (var item in detalles)
+                    {
+                        if (int.TryParse(item.Trim(), out int idCancionMesa))
+                        {
+                            var cancionMesa = await _context.CancionesMesas.FindAsync(idCancionMesa);
+                            if (cancionMesa != null)
+                            {
+                                cancionMesa.EstadoEspecial = 2;
+                                _context.CancionesMesas.Update(cancionMesa);
+                            }
+                        }
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
+
                 var cmd = _context.Database.GetDbConnection().CreateCommand();
                 cmd.CommandText = "InsertarPedido";
                 cmd.CommandType = CommandType.StoredProcedure;

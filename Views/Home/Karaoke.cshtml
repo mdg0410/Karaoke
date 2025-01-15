@@ -4,16 +4,6 @@
 
 <h2>Formulario Karaoke</h2>
 
-@if (!string.IsNullOrEmpty(ViewBag.Error))
-{
-    <div style="color: red;">@ViewBag.Error</div>
-}
-
-@if (!string.IsNullOrEmpty(ViewBag.Success))
-{
-    <div style="color: green;">@ViewBag.Success</div>
-}
-
 <form class="form-Panel" id="karaokeForm">
     <label for="datos">Ingrese los datos (formato: 123-456-789):</label>
     <input type="text" id="datos" name="datos" pattern="^\d{1,4}-\d{1,4}-\d{1,4}$" required />
