@@ -37,7 +37,7 @@ Este proyecto es un sistema integral diseñado para la gestión eficiente de mes
 -   [**Entity Framework**](https://docs.microsoft.com/en-us/ef/)
 -   [**Bootstrap**](https://getbootstrap.com/)
 -   [**JavaScript**](https://www.javascript.com/)
--   [**SQL Server**](https://www.microsoft.com/en-us/sql-server) (o tu base de datos de preferencia)
+-   [**SQL Server**](https://www.microsoft.com/en-us/sql-server)
 -   [**Razor Pages**](https://docs.microsoft.com/en-us/aspnet/core/razor-pages/?view=aspnetcore-7.0&tabs=visual-studio)
 -   [**CSHTML**](https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-7.0)
 
