@@ -1,18 +1,17 @@
-using System.Data;
-using System.Diagnostics;
-using Karaoke.Data;
-using Karaoke.Models;
-using Karaoke.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+    using System.Diagnostics;
+    using Karaoke.Data;
+    using Karaoke.Models;
+    using Karaoke.ViewModels;
+    using Microsoft.AspNetCore.Mvc;
 
 namespace Karaoke.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+
         private readonly KaraokeContext _context;
+
         public HomeController(ILogger<HomeController> logger, KaraokeContext context)
         {
             _logger = logger;
