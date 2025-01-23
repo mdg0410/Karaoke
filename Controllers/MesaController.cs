@@ -24,7 +24,8 @@ namespace Karaoke.Controllers
                     Select(m => new
                     {
                         m.IdMesa,
-                        m.Credencial
+                        m.Credencial,
+                        m.IdEstadoMesa,
                     }).ToListAsync();
                 return Ok(mesas);
             }

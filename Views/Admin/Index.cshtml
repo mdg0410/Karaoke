@@ -67,7 +67,7 @@
 
                         <div class="mt-3">
                             <h5>Total Mesas Consumido</h5>
-                            <div class="p-3 border bg-light">@Model.TotalSumado.TotalSumado</div> 
+                            <div class="p-3 border bg-light">@Model.Totales.TotalGeneral</div> 
                         </div>
                     </div>
                 </div>
@@ -92,79 +92,7 @@
         </div>
 </div>
 
-<style>
-    /* Estilos para las mesas */
-    .mesa {
-        width: 80px; 
-        height: 80px; 
-        border: 1px solid #ccc;
-        margin: 10px; 
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        cursor: pointer;
-        background-size: cover; 
-        border-radius: 10px; 
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); 
-    }
+<!-- Estilos personalizados -->
+<link rel="stylesheet" href="~/css/admin.css">
 
-    .mesa.libre { background-image: url('img/Mesas/Mesa-Libre.svg'); }
-
-        .mesa.ocupada {
-            background-image: url('img/Mesas/Mesa-Ocupada.svg');
-        }
-
-        .mesa.reservada {
-            background-image: url('img/Mesas/Mesa-Reservada.svg');
-        }
-
-        .mesa.fueraservicio {
-            background-image: url('img/Mesas/Mesa-FueraServicio.svg');
-        }
-
-        .mesa.cuenta {
-            background-image: url('img/Mesas/Mesa-Cuenta.svg');
-        }
-
-    /* Estilos para el panel lateral */
-    .card {
-        border: none; 
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); 
-    }
-
-    .card-header {
-        background-color: #007bff; 
-        color: #fff; 
-    }
-
-    /* Estilos para los totales */
-    .p-3.border.bg-light {
-        font-size: 1.2em; 
-        font-weight: bold; 
-    }
-</style>
-
-<script>
-    $(document).ready(function() {
-        // Manejar clics en las mesas
-        $(".mesa").click(function() {
-            const mesaId = $(this).data("mesa-id");
-            const estado = $(".nav-pills .nav-link.active").data("estado"); // Obtener el estado activo del segundo nav
-
-            // Actualizar el estado de la mesa en el servidor (llamada AJAX)
-            actualizarEstadoMesa(mesaId, estado);
-
-            // Actualizar la imagen de la mesa (usando clases CSS)
-            $(this).removeClass("libre ocupada reservada fuera-de-servicio cuenta");
-            $(this).addClass(estado);
-        });
-
-        // Función para simular la actualización del estado en el servidor
-        function actualizarEstadoMesa(mesaId, nuevoEstado) {
-            // Lógica para enviar la actualización al servidor (AJAX)
-            // ... (Aquí debes implementar la lógica AJAX real) ...
-            console.log(`Actualizando mesa ${mesaId} a estado ${nuevoEstado}`);
-        }
-    });
-</script>
+<script src="~/js/admin/admin.js"></script>

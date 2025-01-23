@@ -8,7 +8,7 @@ namespace Karaoke.ViewModels
         public PedidosViewModel Pedidos { get; set; } = new(); // Initialize with an empty PedidosViewModel
         public CancionesViewModel Canciones { get; set; } = new(); // Initialize with an empty CancionesViewModel
         public UsuariosViewModel Usuarios { get; set; } = new(); // Initialize with an empty UsuariosViewModel
-        public TotalesViewModel TotalSumado { get; set; } = new(); // Initialize with an empty TotalesViewModel
+        public TotalesViewModel Totales { get; set; } = new(); // Initialize with an empty TotalViewModel
     }
 
     public class MesasViewModel
@@ -36,8 +36,10 @@ namespace Karaoke.ViewModels
         public List<Role> Roles { get; set; } = new(); // Initialize with an empty list of Role
     }
 
-    public class TotalesViewModel
+    public class  TotalesViewModel 
     {
-        public decimal TotalSumado { get; set; }
+        public decimal TotalGeneral { get; set; }
     }
+
+
 }

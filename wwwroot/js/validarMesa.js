@@ -22,6 +22,8 @@
                 if (item.credencial === mesaCredencial) {
                     if (item.idMesa === parseInt(idMesa)) {
                         mesaValidada = true;
+                        console.log('Mesa validada:', item);
+                        localStorage.setItem('EstadoMesa', item.IdEstadoMesa);
                     }
                 }
             });

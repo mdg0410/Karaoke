@@ -1,0 +1,58 @@
+﻿/* Estilos para las mesas */
+
+body {
+    background-color: #f8f9fa;
+    color: #0c0c0c;
+}
+
+.mesa {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    background-size: cover;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+    .mesa.libre {
+        background-image: url('../img/Mesas/Mesa-Libre.svg');
+    }
+
+    .mesa.ocupada {
+        background-image: url('../img/Mesas/Mesa-Ocupada.svg');
+    }
+
+    .mesa.reservada {
+        background-image: url('../img/Mesas/Mesa-Reservada.svg');
+    }
+
+    .mesa.fueraservicio {
+        background-image: url('../img/Mesas/Mesa-FueraServicio.svg');
+    }
+
+    .mesa.cuenta {
+        background-image: url('../img/Mesas/Mesa-Cuenta.svg');
+    }
+
+/* Estilos para el panel lateral */
+.card {
+    border: none;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Estilos para los totales */
+.p-3.border.bg-light {
+    font-size: 1.2em;
+    font-weight: bold;
+}

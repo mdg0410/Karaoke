@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Karaoke.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class AdminController : Controller
     {
         private readonly KaraokeContext _context;
@@ -14,7 +16,7 @@ namespace Karaoke.Controllers
     {
         _context = context;
     }
-
+      
         public IActionResult Index()
         {
 
@@ -50,20 +52,78 @@ namespace Karaoke.Controllers
                     ListaUsuarios = _context.Usuarios.Include(u => u.IdRolNavigation).ToList(),
                     Roles = _context.Roles.ToList()
                 },
-                TotalSumado = new TotalesViewModel
+                Totales = new TotalesViewModel
                 {
-                    TotalSumado = totalGeneral
+                    TotalGeneral = totalGeneral
                 }
             };
 
             return View(model);
         }
 
-        public IActionResult Test()
-        {
-            var totalSumado = _context.Database.ExecuteSqlRaw("DECLARE @result INT; EXEC @result = ObtenerTotalSumado; SELECT @result");
+        //public IActionResult Test()
+        //{
+        //    var totalSumado = _context.Database.ExecuteSqlRaw("DECLARE @result INT; EXEC @result = ObtenerTotalSumado; SELECT @result");
 
-            return View((object)totalSumado);
+        //    return View((object)totalSumado);
+        //}
+
+
+
+
+        // En tu AdminController
+
+        [HttpPost("ActualizarMesa")]
+        public IActionResult ActualizarMesa(int mesaId, string nuevoEstado)
+        {
+            // 1. Buscar la mesa en la base de datos
+            var mesa = _context.Mesas.Find(mesaId);
+
+            if (mesa == null)
+            {
+                return NotFound(); // O manejar el error de otra manera
+            }
+
+            // 2. Obtener el ID del estado correspondiente al nuevoEstado
+            var estado = _context.EstadosMesas.FirstOrDefault(e => e.NombreEstado.ToLower() == nuevoEstado);
+
+            if (estado == null)
+            {
+                return BadRequest(); // O manejar el error de otra manera
+            }
+
+            // 3. Actualizar el estado de la mesa
+            mesa.IdEstadoMesa = estado.IdEstadoMesa;
+
+            if(estado.IdEstadoMesa == 1)
+            {
+                mesa.Credencial = null;
+                mesa.EstadoEspecial = false;
+            }
+            
+            _context.SaveChanges();
+
+            return Ok(new { message = "Estado actualizado", success = true });
         }
+
+        [HttpPost("ActualizarEstadoEspecial")]
+        public IActionResult ActualizarEstadoEspecial(int mesaId, bool estadoEspecial)
+        {
+            // 1. Buscar la mesa en la base de datos
+            var mesa = _context.Mesas.Find(mesaId);
+
+            if (mesa == null)
+            {
+                return NotFound(); // O manejar el error de otra manera
+            }
+
+            // 2. Actualizar el estado especial de la mesa
+            mesa.EstadoEspecial = estadoEspecial;
+            _context.SaveChanges();
+
+            return Ok(); // O devolver una respuesta con información adicional si es necesario
+        }
+
+
     }
 }

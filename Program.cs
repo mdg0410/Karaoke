@@ -52,6 +52,15 @@ app.MapControllerRoute(
     name: "enviarFormulario",
     pattern: "{controller=Karaoke}/{action=EnviarFormulario}/{data?}");
 
+app.MapControllerRoute(
+    name: "actualizarMesa",
+    pattern: "{controller=Admin}/{action=ActualizarMesa}/{idMesa?}/{idEstadoMesa?}");
+
+app.MapControllerRoute(
+    name: "actualizarEstadoEspecial",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}/{idEstadoMesa?}");
+
+
 app.MapControllers();
 
 app.Run();
