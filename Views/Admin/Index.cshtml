@@ -1,98 +1,177 @@
 ﻿@model Karaoke.ViewModels.AdminViewModel
 
+
 @{
+
     ViewData["Title"] = "Admin - Mesas";
+
 }
 
+
 <nav>
+
     <ul class="nav nav-tabs">
+
         <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" data-bs-target="#mesas" href="#">Mesas</a></li>
+
         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#pedidos" href="#">Pedidos</a></li>
+
         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#canciones" href="#">Canciones</a></li>
+
         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#avanzado" href="#">Avanzado</a></li>
+
         <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#cierre" href="#">Cierre</a></li>
+
     </ul>
+
 </nav>
 
+
 <div class="tab-content">
+
     <div id="mesas" class="tab-pane fade show active">
+
         <div class="row mt-3">
+
             <div class="col-md-8">
+
                 <div class="col-md-12">
+
                     <ul class="nav nav-pills nav-fill">
+
                         @foreach (var estado in Model.Mesas.EstadosMesa)
+
                         {
+
                             <li class="nav-item">
+
                                 <a class="nav-link @(estado.IdEstadoMesa == 1 ? "active" : "")" data-bs-toggle="tab" data-bs-target="#@estado.NombreEstado.ToLower()" data-estado="@estado.NombreEstado.ToLower()" href="#">
+
                                     @estado.NombreEstado
+
                                 </a>
+
                             </li>
+
                         }
+
                     </ul>
+
                 </div>
+
                 <div class="mesas-container d-flex flex-wrap">
-                    @for (int i = 1; i <= 15; i++) 
+
+                    @for (int i = 1; i <= 15; i++)
+
                     {
+
                         var mesa = Model.Mesas.ListaMesas.FirstOrDefault(m => m.NumeroMesa == i);
-                        var estadoMesa = mesa?.IdEstadoMesaNavigation.NombreEstado.ToLower() ?? "libre"; 
+
+                        var estadoMesa = mesa?.IdEstadoMesaNavigation.NombreEstado.ToLower() ?? "libre";
+
 
                         <div class="mesa @estadoMesa" data-mesa-id="@i">
-							@i
+
+                            @i
+
                         </div>
+
                     }
+
                 </div>
+
             </div>
+
             <div class="col-md-4">
+
                 <div class="card">
+
                     <div class="card-header">
+
                         <h5>Opciones de Mesa</h5>
+
                     </div>
+
                     <div class="card-body">
+
                         <div>
+
                             <h5>Seleccionar Mesa</h5>
-                            <div class="input-group mb-3">
-                                <span class="input-group-text">Mesa #</span>
-                                <input type="number" class="form-control" id="mesa-number" aria-label="Mesa #">
+
+                            <div class="row">
+                                @foreach (var mesa in Model.Mesas.ListaMesas)
+                                {
+                                    var isChecked = mesa.EstadoEspecial == true;
+                                    var isDisabled = mesa.IdEstadoMesaNavigation.NombreEstado.ToLower() == "fueraservicio";
+
+                                    <div class="col-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="mesa-check-@mesa.NumeroMesa" @(isChecked ? "checked" : "") @(isDisabled ? "disabled" : "") onchange="actualizarEstadoEspecial(@mesa.IdMesa, this.checked)">
+                                            <label class="form-check-label" data-mesa-id="@mesa.NumeroMesa" for="mesa-check-@mesa.NumeroMesa">Mesa @mesa.NumeroMesa</label>
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="estado-especial">
-                                <label class="form-check-label" for="estado-especial">Estado Especial</label>
-                            </div>
+
                         </div>
 
                         <div class="mt-3">
-                            <h5>Total Mesas en Cuenta</h5>
-                            <div class="p-3 border bg-light">$0.00</div> 
-                        </div>
 
-                        <div class="mt-3">
                             <h5>Total Mesas Consumido</h5>
-                            <div class="p-3 border bg-light">@Model.Totales.TotalGeneral</div> 
+
+                            <div class="p-3 border bg-light">@Model.Totales.TotalGeneral</div>
+
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
+
     <div id="pedidos" class="tab-pane fade">
+
         <h3>Pedidos</h3>
-        </div>
+
+    </div>
+
 
     <div id="canciones" class="tab-pane fade">
+
         <h3>Canciones</h3>
-        </div>
+
+    </div>
+
 
     <div id="avanzado" class="tab-pane fade">
+
         <h3>Avanzado</h3>
-        </div>
+
+    </div>
+
 
     <div id="cierre" class="tab-pane fade">
+
         <h3>Cierre</h3>
-        </div>
+
+    </div>
+
 </div>
 
+
 <!-- Estilos personalizados -->
+
 <link rel="stylesheet" href="~/css/admin.css">
 
-<script src="~/js/admin/admin.js"></script>
+<script src="~/js/admin/ui.js"></script>
+<script src="~/js/admin/admin.js"></script> 
+<script src="~/js/admin/mesas.js"></script>
+<script src="~/js/admin/pedidos.js"></script>
+<script src="~/js/admin/canciones.js"></script>
+<script src="~/js/admin/cierre.js"></script>
+

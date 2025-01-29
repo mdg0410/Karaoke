@@ -36,7 +36,7 @@ namespace Karaoke.ViewModels
         public List<Role> Roles { get; set; } = new(); // Initialize with an empty list of Role
     }
 
-    public class  TotalesViewModel 
+    public class TotalesViewModel
     {
         public decimal TotalGeneral { get; set; }
     }

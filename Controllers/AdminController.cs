@@ -54,8 +54,7 @@ namespace Karaoke.Controllers
                 },
                 Totales = new TotalesViewModel
                 {
-                    TotalGeneral = totalGeneral
-                }
+                    TotalGeneral = totalGeneral                }
             };
 
             return View(model);
@@ -99,11 +98,11 @@ namespace Karaoke.Controllers
             {
                 mesa.Credencial = null;
                 mesa.EstadoEspecial = false;
-            }
+            }   
             
             _context.SaveChanges();
 
-            return Ok(new { message = "Estado actualizado", success = true });
+            return Ok(new { estadoMesa = mesa.IdEstadoMesaNavigation.NombreEstado});
         }
 
         [HttpPost("ActualizarEstadoEspecial")]

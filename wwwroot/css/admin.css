@@ -56,3 +56,21 @@ body {
     font-size: 1.2em;
     font-weight: bold;
 }
+
+/* Ajuste de espacio entre las mesas */
+.mesas-container {
+    padding: 10px; /* Ajusta el espacio entre las mesas */
+}
+
+/* Estilos para los totales de las mesas */
+.totales-mesas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+    .totales-mesas > div {
+        margin: 5px;
+        font-size: 1.2em;
+        font-weight: bold;
+    }
