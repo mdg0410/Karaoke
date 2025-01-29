@@ -3,6 +3,8 @@ using Karaoke.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Karaoke.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Karaoke.Controllers
 {
@@ -12,11 +14,11 @@ namespace Karaoke.Controllers
     {
         private readonly KaraokeContext _context;
 
-    public AdminController(KaraokeContext context)
-    {
-        _context = context;
-    }
-      
+        public AdminController(KaraokeContext context)
+        {
+            _context = context;
+        }
+
         public IActionResult Index()
         {
 
@@ -73,36 +75,18 @@ namespace Karaoke.Controllers
         // En tu AdminController
 
         [HttpPost("ActualizarMesa")]
-        public IActionResult ActualizarMesa(int mesaId, string nuevoEstado)
+        public async Task<IActionResult> ActualizarMesa(int mesaId, string nuevoEstado)
         {
-            // 1. Buscar la mesa en la base de datos
             var mesa = _context.Mesas.Find(mesaId);
+            if (mesa == null) return NotFound();
 
-            if (mesa == null)
-            {
-                return NotFound(); // O manejar el error de otra manera
-            }
-
-            // 2. Obtener el ID del estado correspondiente al nuevoEstado
             var estado = _context.EstadosMesas.FirstOrDefault(e => e.NombreEstado.ToLower() == nuevoEstado);
+            if (estado == null) return BadRequest();
 
-            if (estado == null)
-            {
-                return BadRequest(); // O manejar el error de otra manera
-            }
-
-            // 3. Actualizar el estado de la mesa
             mesa.IdEstadoMesa = estado.IdEstadoMesa;
+            await _context.SaveChangesAsync();
 
-            if(estado.IdEstadoMesa == 1)
-            {
-                mesa.Credencial = null;
-                mesa.EstadoEspecial = false;
-            }   
-            
-            _context.SaveChanges();
-
-            return Ok(new { estadoMesa = mesa.IdEstadoMesaNavigation.NombreEstado});
+            return Ok();
         }
 
         [HttpPost("ActualizarEstadoEspecial")]

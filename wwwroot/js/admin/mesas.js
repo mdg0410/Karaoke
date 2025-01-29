@@ -1,4 +1,8 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+﻿import { connection } from '../signalRConnection.js';
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
 
     // ---  Mesas  ---
     // Obtener todos los elementos de la lista de mesas
@@ -17,6 +21,7 @@
 
     });
 
+  
     // --- Función para actualizar el estado de la mesa en el servidor (AJAX) ---
 
     function actualizarEstadoMesa(mesaId, nuevoEstado) {
@@ -41,15 +46,7 @@
 
                 }
 
-                return response.json();
-
-            })
-
-            .then(data => {
-
-                console.log('Respuesta del servidor:', data);
-
-                actualizarVistaMesa(mesaId, nuevoEstado, data.estadoMesa);
+                actualizarVistaMesa(mesaId, nuevoEstado);
 
             })
             
@@ -61,7 +58,14 @@
 
     }
 
-    function actualizarVistaMesa(mesaId, nuevoEstado, estadoMesa) {
+
+    connection.on("RecibirCambioMesa", (mesaId, nuevoEstado) => {
+        console.log(`Recibido cambio de estado de mesa ${mesaId} a ${nuevoEstado}`);
+        actualizarVistaMesa(mesaId, nuevoEstado);
+    });
+
+
+    function actualizarVistaMesa(mesaId, nuevoEstado) {
 
         const mesa = document.querySelector(`.mesa[data-mesa-id="${mesaId}"]`);
         mesa.classList.remove("libre", "ocupada", "reservada", "cuenta", "fueraservicio");
@@ -69,7 +73,7 @@
 
 
         const checkmesa = document.getElementById(`mesa-check-${mesaId}`);
-        if (estadoMesa.toLowerCase() === "fueraservicio") {
+        if (nuevoEstado.toLowerCase() === "fueraservicio") {
             checkmesa.disabled = true;
         } else {
             checkmesa.disabled = false;

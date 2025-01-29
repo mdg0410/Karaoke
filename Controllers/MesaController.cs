@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Karaoke.Data;
 using Microsoft.EntityFrameworkCore;
+using Karaoke.Models;
+using Microsoft.AspNetCore.SignalR;
+using Karaoke.Hubs;
 
 namespace Karaoke.Controllers
 {
@@ -9,10 +12,14 @@ namespace Karaoke.Controllers
     [Route("[controller]")]
     public class MesaController : ControllerBase
     {
+        private readonly IHubContext<KaraokeHub> _hubContext;
+
         private readonly KaraokeContext _context;
-        public MesaController(KaraokeContext context)
+        public MesaController(KaraokeContext context, IHubContext<KaraokeHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
+
         }
 
         [HttpGet("Certificado")]
@@ -42,6 +49,10 @@ namespace Karaoke.Controllers
         public async Task<IActionResult> Validar(int idMesa)
         {
             var mesa = await _context.Mesas.FindAsync(idMesa);
+
+            // Notificar a todos los clientes conectados
+            await _hubContext.Clients.All.SendAsync("RecibirCambioMesa", idMesa, "ocupada");
+
 
             if (mesa == null)
             {

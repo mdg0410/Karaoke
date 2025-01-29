@@ -1,7 +1,10 @@
 using Karaoke.Data;
+using Karaoke.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSignalR();
 
 // Context for the database
 
@@ -34,6 +37,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.MapHub<KaraokeHub>("/karaokeHub");
 
 app.MapControllerRoute(
     name: "default",
