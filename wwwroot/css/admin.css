@@ -74,3 +74,48 @@ body {
         font-size: 1.2em;
         font-weight: bold;
     }
+
+
+
+
+/* Estilos para el contenedor de pedidos */ .pedidos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Estilos para el grupo de pedidos */ .pedido-group {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* Estilos para el encabezado del grupo de pedidos */ .pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+    .pedido-header.codigo {
+        font-weight: bold;
+    }
+
+    .pedido-header.total {
+        font-weight: bold;
+    }
+
+/* Estilos para la tabla de detalles de pedidos */ .table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+    .table th, .table td {
+        padding: 5px;
+    }
+
+/* Estilos para los botones de control */ .botones-control {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+}

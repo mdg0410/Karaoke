@@ -84,6 +84,13 @@ namespace Karaoke.Controllers
             if (estado == null) return BadRequest();
 
             mesa.IdEstadoMesa = estado.IdEstadoMesa;
+
+            if (estado.IdEstadoMesa == 1)
+            {
+                mesa.Credencial = null;
+                mesa.EstadoEspecial = false;
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok();
@@ -106,6 +113,8 @@ namespace Karaoke.Controllers
 
             return Ok(); // O devolver una respuesta con información adicional si es necesario
         }
+
+        
 
 
     }
