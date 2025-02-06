@@ -119,3 +119,8 @@ body {
     display: flex;
     gap: 5px;
 }
+
+.boton-seleccionado {
+  background-color: #8713df; /* Cambia el color de fondo según tu preferencia */
+  color: white;
+}

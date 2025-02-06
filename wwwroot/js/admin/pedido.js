@@ -6,15 +6,25 @@
     const totalPendiente = document.getElementById('totalPendiente');
     const totalEnCuenta = document.getElementById('totalEnCuenta');
     const popupCerrarMesa = new bootstrap.Modal(document.getElementById('popupCerrarMesa'));
+    const popupVerCanciones = new bootstrap.Modal(document.getElementById('popupVerCanciones'));
     const mensajeCerrarMesa = document.getElementById('mensajeCerrarMesa');
     const listaPendientes = document.getElementById('listaPendientes');
     const btnConfirmarCerrarMesa = document.getElementById('btnConfirmarCerrarMesa');
+    const btnVerCanciones = document.getElementById('btnVerCanciones');
+    const btnDesactivarMesa = document.getElementById('btnDesactivarMesa');
+    const btnCerrarMesa = document.getElementById('btnCerrarMesa');
 
     let mesaSeleccionada = null;
 
     // --- Mostrar pedidos de la mesa seleccionada ---
     mesaButtons.forEach(button => {
         button.addEventListener('click', function () {
+          // Remover la clase de todos los botones
+        mesaButtons.forEach(btn => btn.classList.remove('boton-seleccionado'));
+
+        // Agregar la clase al botón seleccionado
+        this.classList.add('boton-seleccionado');
+
             mesaSeleccionada = this.dataset.mesaId;
             mostrarPedidosMesa(mesaSeleccionada);
             actualizarTotales(mesaSeleccionada);
@@ -28,7 +38,6 @@
             if (pedido.dataset.mesaId === mesaId) {
                 pedido.style.display = 'block';
                 const estado = pedido.querySelector('.pedido-header').dataset.estadoPedido;
-                console.log(estado);
                 pintarPedidoPorEstado(pedido, estado);
             } else {
                 pedido.style.display = 'none';
@@ -52,7 +61,7 @@
                 pedido.style.backgroundColor = '#AEC6CF'; // Azul
                 break;
             default:
-                pedido.style.backgroundColor = '#000000'; // Gris por defecto
+                pedido.style.backgroundColor = '#f8f9fa'; // Gris por defecto
                 break;
         }
     }
@@ -66,7 +75,6 @@
             if (pedido.dataset.mesaId === mesaId) {
                 const estado = pedido.querySelector('.pedido-header').dataset.estadoPedido;
                 const total = parseFloat(pedido.querySelector('.total').textContent.replace('Total: $', ''));
-
 
                 switch (estado) {
                     case 'pendiente':
@@ -92,102 +100,206 @@
         totalEnCuenta.textContent = `$${enCuenta.toFixed(2)}`;
     }
 
-    // --- Botones de control ---
-    document.getElementById('btnCerrarMesa').addEventListener('click', function () {
+    // --- Botones de estado de pedidos (Servido, Pagado, Eliminar) ---
+    listaPedidos.addEventListener('click', async function (e) {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+
+        const pedidoGroup = btn.closest('.pedido-group');
+        const codigoPedido = pedidoGroup.dataset.pedidoCodigo;
+
+        if (btn.classList.contains('btn-servido')) {
+            await cambiarEstadoPedido(codigoPedido, 2); // Estado Servido
+        } else if (btn.classList.contains('btn-pagado')) {
+            await cambiarEstadoPedido(codigoPedido, 3); // Estado Pagado
+        } else if (btn.classList.contains('btn-eliminar')) {
+            await cambiarEstadoPedido(codigoPedido, 4); // Estado Eliminado
+        }
+    });
+
+    // Función para cambiar el estado del pedido
+    async function cambiarEstadoPedido(codigoPedido, nuevoEstado) {
+        try {
+            const response = await fetch(`/Admin/ActualizarEstadoPedido?codigoPedido=${codigoPedido}&nuevoEstado=${nuevoEstado}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const estadoNombre = await response.text(); // Obtener el nombre del estado desde el servidor
+                const pedidoHeader = document.querySelector(`.pedido-group[data-pedido-codigo="${codigoPedido}"] .pedido-header`);
+                const pedidoGroup = document.querySelector(`.pedido-group[data-pedido-codigo="${codigoPedido}"]`);
+
+                if (nuevoEstado === 4) {
+                    // Si el estado es "Eliminado", ocultar el pedido
+                    pedidoGroup.remove();
+                } else {
+                    // Actualizar el estado y el color del pedido
+                    pedidoHeader.dataset.estadoPedido = estadoNombre.toLowerCase();
+                    pintarPedidoPorEstado(pedidoHeader.parentElement, estadoNombre.toLowerCase());
+                }
+
+                // Actualizar los totales
+                actualizarTotales(mesaSeleccionada);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // --- Botón "Ver Canciones" ---
+    btnVerCanciones.addEventListener('click', async function () {
+      if (!mesaSeleccionada) {
+          alert('Seleccione una mesa primero');
+          return;
+      }
+  
+      try {
+          const response = await fetch(`/Admin/ObtenerCancionesMesa?mesaId=${mesaSeleccionada}`);
+          const canciones = await response.json();
+  
+          console.log('Canciones:', canciones);
+  
+          // Crear contenido para mostrar las canciones
+          const contenido = canciones.map(c => `
+              <li class="cancion ${c.id}">
+                  <span>${c.detalle}</span>
+                  <span>Estado: ${c.estado}</span>
+              </li>
+          `).join('');
+  
+          // Mostrar en la sección de canciones
+          document.getElementById('listaCanciones').innerHTML = contenido;
+          
+          // Mostrar el popup
+          popupVerCanciones.show();
+          
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  });
+
+
+  function filtrarPedidosPorEstado(estadoFiltrar) {
+    const pedidos = listaPedidos.querySelectorAll('.pedido-group');
+    
+    pedidos.forEach(pedido => {
+        const esDeMesaSeleccionada = pedido.dataset.mesaId === mesaSeleccionada;
+        const estadoPedido = pedido.querySelector('.pedido-header').dataset.estadoPedido;
+
+        if (esDeMesaSeleccionada) {
+            pedido.style.display = (estadoPedido === estadoFiltrar) ? 'block' : 'none';
+        } else {
+            // Mantener pedidos de otras mesas ocultos
+            pedido.style.display = 'none';
+        }
+    });
+}
+
+// Modificar los event listeners de los botones de filtrado
+document.getElementById('btnFiltrarPendientes').addEventListener('click', () => {
+    filtrarPedidosPorEstado('pendiente');
+});
+
+document.getElementById('btnFiltrarServidos').addEventListener('click', () => {
+    filtrarPedidosPorEstado('servido');
+});
+
+document.getElementById('btnFiltrarPagados').addEventListener('click', () => {
+    filtrarPedidosPorEstado('pagado');
+});
+
+document.getElementById('btnFiltrarEnCuenta').addEventListener('click', () => {
+    filtrarPedidosPorEstado('cuenta');
+});
+
+    // En el evento del botón Cerrar Mesa
+    btnCerrarMesa.addEventListener('click', async function () {
         if (!mesaSeleccionada) {
             alert('Por favor, seleccione una mesa.');
             return;
         }
 
+        // Verificar pedidos pendientes
         const pedidosPendientes = Array.from(listaPedidos.querySelectorAll('.pedido-group'))
-            .filter(pedido => pedido.dataset.mesaId === mesaSeleccionada && pedido.querySelector('.pedido-header').dataset.estadoPedido === 'pendiente' && pedido.querySelector('.pedido-header').dataset.estadoPedido === 'servido');
+            .filter(pedido =>
+                pedido.dataset.mesaId === mesaSeleccionada &&
+                (pedido.querySelector('.pedido-header').dataset.estadoPedido === 'pendiente' ||
+                    pedido.querySelector('.pedido-header').dataset.estadoPedido === 'servido')
+            );
 
-        if (pedidosPendientes.length > 0) {
-            mensajeCerrarMesa.textContent = 'Hay pedidos pendientes de pago:';
-            listaPendientes.innerHTML = pedidosPendientes.map(pedido => {
-                const codigo = pedido.querySelector('.codigo').textContent;
-                const total = pedido.querySelector('.total').textContent;
-                return `<li>${codigo} - ${total}</li>`;
-            }).join('');
+        // Verificar canciones pendientes
+        const cancionesPendientes = await fetch(`/Admin/VerificarCancionesPendientes?mesaId=${mesaSeleccionada}`)
+            .then(res => res.json());
+
+        if (pedidosPendientes.length > 0 || cancionesPendientes.length > 0) {
+            mensajeCerrarMesa.textContent = 'Hay elementos pendientes:';
+            listaPendientes.innerHTML = [
+                ...pedidosPendientes.map(pedido => {
+                    const codigo = pedido.querySelector('.codigo').textContent;
+                    const total = pedido.querySelector('.total').textContent;
+                    return `<li>Pedido ${codigo} - ${total}</li>`;
+                }),
+                ...cancionesPendientes.map(c => `<li>Canción: ${c.id} - Estado: ${c.estado}</li>`)
+            ].join('');
         } else {
-            mensajeCerrarMesa.textContent = 'Todos los pedidos están pagados. ¿Desea cerrar la mesa?';
+            mensajeCerrarMesa.textContent = 'No hay pendientes. ¿Desea cerrar la mesa?';
             listaPendientes.innerHTML = '';
         }
 
         popupCerrarMesa.show();
     });
 
-    btnConfirmarCerrarMesa.addEventListener('click', function () {
+    // --- Lógica de cierre de mesa ---
+    btnConfirmarCerrarMesa.addEventListener('click', async function () {
         if (!mesaSeleccionada) {
             alert('Por favor, seleccione una mesa.');
             return;
         }
 
-        // Aquí puedes agregar la lógica para cerrar la mesa (por ejemplo, una llamada a la API)
-        alert(`Mesa ${mesaSeleccionada} cerrada correctamente.`);
-        popupCerrarMesa.hide();
-    });
+        try {
+            // Actualizar pedidos
+            const responsePedidos = await fetch(`/Admin/CerrarMesa?mesaId=${mesaSeleccionada}`, {
+                method: 'POST'
+            });
 
-    // --- Filtros por estado ---
-    document.getElementById('btnFiltrarPendientes').addEventListener('click', function () {
-        filtrarPedidosPorEstado('pendiente');
-    });
+            // Actualizar canciones
+            const responseCanciones = await fetch(`/Admin/CerrarCancionesMesa?mesaId=${mesaSeleccionada}`, {
+                method: 'POST'
+            });
 
-    document.getElementById('btnFiltrarServidos').addEventListener('click', function () {
-        filtrarPedidosPorEstado('servido');
-    });
-
-    document.getElementById('btnFiltrarPagados').addEventListener('click', function () {
-        filtrarPedidosPorEstado('pagado');
-    });
-
-    document.getElementById('btnFiltrarEnCuenta').addEventListener('click', function () {
-        filtrarPedidosPorEstado('cuenta');
-    });
-
-    function filtrarPedidosPorEstado(estado) {
-        const pedidos = listaPedidos.querySelectorAll('.pedido-group');
-        pedidos.forEach(pedido => {
-            if (pedido.dataset.mesaId === mesaSeleccionada && pedido.querySelector('.pedido-header').dataset.estadoPedido === estado) {
-                pedido.style.display = 'block';
-            } else {
-                pedido.style.display = 'none';
+            if (responsePedidos.ok && responseCanciones.ok) {
+                // Actualizar la vista
+                mostrarPedidosMesa(mesaSeleccionada);
+                actualizarTotales(mesaSeleccionada);
+                popupCerrarMesa.hide();
             }
-        });
-    }
-
-    // Botones para cambiar estado de los pedidos
-
-    document.getElementById('btn-servido').addEventListener('click', function () {
-
-        filtrarPedidosPorEstado('cuenta');
-    });
-
-    document.getElementById('btn-pagado"').addEventListener('click', function () {
-        filtrarPedidosPorEstado('cuenta');
-    });
-
-    document.getElementById('btn-eliminar').addEventListener('click', function () {
-        filtrarPedidosPorEstado('cuenta');
-    });
-
-    async function cambiarEstadoPedido(pedidoId, nuevoEstado) {
-        const response = await fetch(`/api/pedido/${pedidoId}/estado`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nuevoEstado })
-        });
-        if (response.ok) {
-            const pedido = listaPedidos.querySelector(`.pedido-group[data-pedido-id="${pedidoId}"]`);
-            pedido.querySelector('.pedido-header').dataset.estadoPedido = nuevoEstado;
-            pintarPedidoPorEstado(pedido, nuevoEstado);
-            actualizarTotales(mesaSeleccionada);
-        } else {
-            alert('Ocurrió un error al cambiar el estado del pedido.');
+        } catch (error) {
+            console.error('Error:', error);
         }
-    }
+    });
+
+    document.getElementById('btnDesactivarMesa').addEventListener('click', async function () {
+      if (!mesaSeleccionada) {
+          alert('Por favor, seleccione una mesa.');
+          return;
+      }
+  
+      // Determinar nuevo estado
+      const mesa = await fetch(`/Admin/ObtenerMesa?mesaId=${mesaSeleccionada}`).then(res => res.json());
+      const nuevoEstado = (mesa.idEstadoMesa === 4) ? 'Ocupada' : 'FueraServicio'; // Toggle entre 2 (Activa) y 4 (Desactivada)
+  
+      // Actualizar estado
+      await fetch(`/Admin/ActualizarEstadoMesa?mesaId=${mesaSeleccionada}&nuevoEstado=${nuevoEstado}`, {
+          method: 'POST'
+      });
+  
+      // Actualizar UI
+      this.classList.toggle('btn-secondary', nuevoEstado === 'FueraServicio');
+      this.classList.toggle('btn-warning', nuevoEstado === 'Ocupada');
+      this.textContent = (nuevoEstado === 4) ? 'Desactivada' : 'Desactivar';
+  });
+
+   
 
 
 });

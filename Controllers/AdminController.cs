@@ -114,8 +114,115 @@ namespace Karaoke.Controllers
             return Ok(); // O devolver una respuesta con información adicional si es necesario
         }
 
-        
+        [HttpPost("ActualizarEstadoPedido")]
+        public async Task<IActionResult> ActualizarEstadoPedido(string codigoPedido, int nuevoEstado)
+        {
+            var pedidos = _context.Pedidos.Where(p => p.CodigoPedido == codigoPedido);
+            foreach (var pedido in pedidos)
+            {
+                pedido.IdEstadoPedido = nuevoEstado;
+            }
+            await _context.SaveChangesAsync();
+            var estadoNombre = _context.EstadosPedidos.FirstOrDefault(e => e.IdEstadoPedido == nuevoEstado)?.NombreEstado ?? "Desconocido";
+            return Content(estadoNombre);
+        }
 
+
+
+        // En Construccion
+
+        [HttpGet("ObtenerCancionesMesa")]
+        public async Task<IActionResult> ObtenerCancionesMesa(int mesaId)
+        {
+            var canciones = await _context.CancionesMesas
+        .Where(c => c.IdMesa == mesaId) // Estado 1 = Pendiente
+        .Select(c => new {
+            id = c.IdCancionMesa,
+            detalle = c.Canciones,
+            estado = c.IdEstadoCancionNavigation.NombreEstado
+        })
+        .ToListAsync();
+
+    return Ok(canciones);
+        }
+
+        [HttpPost("CerrarMesa")]
+        public async Task<IActionResult> CerrarMesa(int mesaId)
+        {
+            var pedidos = _context.Pedidos
+                .Where(p => p.IdMesa == mesaId && (p.IdEstadoPedido == 1 || p.IdEstadoPedido == 2 || p.IdEstadoPedido == 5));
+            foreach (var pedido in pedidos)
+            {
+                pedido.IdEstadoPedido = 3; // Pagado
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost("CerrarCancionesMesa")]
+        public async Task<IActionResult> CerrarCancionesMesa(int mesaId)
+        {
+            var canciones = _context.CancionesMesas
+                .Where(c => c.IdMesa == mesaId && c.EstadoEspecial == 0);
+            foreach (var cancion in canciones)
+            {
+                cancion.EstadoEspecial = 2;
+            }
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpGet("VerificarCancionesPendientes")]
+public async Task<IActionResult> VerificarCancionesPendientes(int mesaId)
+{
+    var canciones = await _context.CancionesMesas
+        .Where(c => c.IdMesa == mesaId && c.IdEstadoCancion == 1) // Estado 1 = Pendiente
+        .Select(c => new {
+            id = c.IdCancionMesa,
+            estado = c.IdEstadoCancionNavigation.NombreEstado
+        })
+        .ToListAsync();
+
+    return Ok(canciones);
+}
+
+[HttpGet("ObtenerMesa")]
+public async Task<IActionResult> ObtenerMesa(int mesaId)
+{
+    var mesa = await _context.Mesas
+        .FirstOrDefaultAsync(m => m.IdMesa == mesaId);
+
+    return Ok(new {
+        idEstadoMesa = mesa?.IdEstadoMesa
+    });
+}
+
+[HttpPost("ActualizarEstadoMesa")]
+public async Task<IActionResult> ActualizarEstadoMesa(int mesaId, string nuevoEstado)
+{
+    // Validar si la mesa existe
+    var mesa = await _context.Mesas.FindAsync(mesaId);
+    if (mesa == null)
+    {
+        return NotFound("Mesa no encontrada.");
+    }
+
+    // Validar si el estado existe
+    var estado = await _context.EstadosMesas
+        .FirstOrDefaultAsync(e => e.NombreEstado.ToLower() == nuevoEstado.ToLower());
+    if (estado == null)
+    {
+        return BadRequest("Estado no válido.");
+    }
+
+    // Actualizar el estado de la mesa
+    mesa.IdEstadoMesa = estado.IdEstadoMesa;
+
+    // Guardar cambios en la base de datos
+    await _context.SaveChangesAsync();
+
+    return Ok();
+}
 
     }
 }

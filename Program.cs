@@ -44,7 +44,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Ruta personalizada para el método Validar
+// Ruta personalizada para el mï¿½todo Validar
 app.MapControllerRoute(
     name: "mesaValidar",
     pattern: "{controller=Mesa}/{action=Validar}/{idMesa?}");
@@ -65,6 +65,26 @@ app.MapControllerRoute(
     name: "actualizarEstadoEspecial",
     pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}/{idEstadoMesa?}");
 
+app.MapControllerRoute(
+    name: "actualizarEstadoPedido",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoPedido}/{codigoPedido?}/{nuevoEstado?}");
+
+//En construcciï¿½n
+
+
+app.MapControllerRoute(
+    name: "cerrarMesa",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}");
+
+app.MapControllerRoute(
+    name: "cerrarCancionesMesa",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}");
+
+app.MapControllerRoute(
+    name: "actualizarEstadoMesa",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoMesa}/{idMesa?}/{idEstadoMesa?}");
+
+//Fin de construcciï¿½n
 
 app.MapControllers();
 
