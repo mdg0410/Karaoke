@@ -73,16 +73,16 @@ app.MapControllerRoute(
 
 
 app.MapControllerRoute(
-    name: "cerrarMesa",
-    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}");
+    name: "cerrarPedidosMesa",
+    pattern: "{controller=Admin}/{action=CerrarPedidosMesa}/{idMesa?}");
 
 app.MapControllerRoute(
-    name: "cerrarCancionesMesa",
-    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}");
+    name: "CerrarCancionesMesa",
+    pattern: "{controller=Admin}/{action=CerrarCancionesMesa}/{idMesa?}");
 
 app.MapControllerRoute(
-    name: "actualizarEstadoMesa",
-    pattern: "{controller=Admin}/{action=ActualizarEstadoMesa}/{idMesa?}/{idEstadoMesa?}");
+    name: "CierreMesa",
+    pattern: "{controller=Admin}/{action=CierreMesa}/{idMesa?}");
 
 //Fin de construcci�n
 

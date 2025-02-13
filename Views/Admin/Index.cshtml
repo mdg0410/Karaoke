@@ -133,34 +133,24 @@
 
     </div>
 
-    
-
-
-
     <div id="pedidos" class="tab-pane fade">
         <h3>Pedidos</h3>
 
-        <!-- Botones para seleccionar la mesa -->
         <div class="mesas-buttons mb-3">
-            @foreach (var mesa in Model.Mesas.ListaMesas)
-            {
-                <button class="btn btn-outline-primary mesa-button" data-mesa-id="@mesa.IdMesa">Mesa @mesa.NumeroMesa</button>
+            @foreach (var mesa in Model.Mesas.ListaMesas) {
+              <button class="btn btn-outline-primary mesa-button" data-mesa-id="@mesa.IdMesa">Mesa @mesa.NumeroMesa</button>
             }
         </div>
 
-        <!-- Contenedor principal -->
         <div class="row">
-            <!-- Parte 1: Lista de pedidos -->
             <div class="col-md-8">
                 <div id="listaPedidos" class="pedidos-container">
                     @foreach (var grupoPedido in Model.Pedidos.ListaPedidos.GroupBy(p => p.CodigoPedido))
                     {
                         <div class="pedido-group" data-mesa-id="@grupoPedido.First().IdMesa" data-pedido-codigo="@grupoPedido.Key">
-                            <!-- Encabezado del pedido -->
                             <div class="pedido-header" data-estado-pedido="@grupoPedido.First().IdEstadoPedidoNavigation?.NombreEstado.ToLower()">
                                 <div class="codigo">Código: @grupoPedido.Key</div>
                                 <div class="total">Total: $@grupoPedido.Sum(p => p.Cantidad * p.IdProductoNavigation?.Precio)</div>
-                                <!-- Botón para abrir/cerrar detalles -->
                                 <button class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#detalles-@grupoPedido.Key">
                                     Ver
                                 </button>
@@ -182,7 +172,7 @@
                                             <tr>
                                                 <td>@pedido.IdProductoNavigation?.Nombre</td>
                                                 <td>@pedido.Cantidad</td>
-                                                <td>$@pedido.IdProductoNavigation?.Precio</td>
+                                                <td >$@pedido.IdProductoNavigation?.Precio</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -266,6 +256,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-primary" id="btnConfirmarCerrarMesa">Confirmar</button>
+                    <button type="button" disabled id="totalCierreMesa">Total: $<span id="totalCerrarMesa">0.00</span></button>
                 </div>
             </div>
         </div>
@@ -300,6 +291,27 @@
 
         <h3>Canciones</h3>
 
+        <ul id="cancionesLista" class="list-group">
+
+        </ul>
+        @* @foreach(var cancion in Model.Canciones.ListaCanciones)
+
+        {
+
+            <div class="cancion">
+
+                <div class="titulo">@cancion.IdCancionMesa</div>
+
+                <div class="artista">@cancion.Canciones</div>
+
+                <div class="genero">@cancion.IdEstadoCancionNavigation</div>
+
+                <div class="duracion">@cancion.IdMesa</div>
+
+            </div>
+
+        } *@
+
     </div>
 
 
@@ -327,6 +339,7 @@
 <script src="~/js/admin/admin.js"></script> 
 <script src="~/js/admin/mesas.js" type="module"></script>
 <script src="~/js/admin/pedido.js"></script>
-<script src="~/js/admin/canciones.js"></script>
+<script src="~/js/admin/cancion.js"></script>
 <script src="~/js/admin/cierre.js"></script>
+
 

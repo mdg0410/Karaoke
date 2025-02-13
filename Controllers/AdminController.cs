@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Karaoke.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Data.SqlClient;
+using System.Data;
+
 
 namespace Karaoke.Controllers
 {
@@ -115,17 +118,53 @@ namespace Karaoke.Controllers
         }
 
         [HttpPost("ActualizarEstadoPedido")]
-        public async Task<IActionResult> ActualizarEstadoPedido(string codigoPedido, int nuevoEstado)
+public async Task<IActionResult> ActualizarEstadoPedido(string codigoPedido, int nuevoEstado)
+{
+    var pedidos = await _context.Pedidos
+        .Where(p => p.CodigoPedido == codigoPedido)
+        .ToListAsync();
+
+    foreach (var pedido in pedidos)
+    {
+        pedido.IdEstadoPedido = nuevoEstado;
+
+        if (pedido.IdProducto == 23 && pedido.DetalleAdicional != null)
         {
-            var pedidos = _context.Pedidos.Where(p => p.CodigoPedido == codigoPedido);
-            foreach (var pedido in pedidos)
+            var detalles = pedido.DetalleAdicional.Split(',');
+            foreach (var item in detalles)
             {
-                pedido.IdEstadoPedido = nuevoEstado;
+                if (int.TryParse(item.Trim(), out int idCancionMesa))
+                {
+                    var cancionMesa = await _context.CancionesMesas
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(cm => cm.IdCancionMesa == idCancionMesa);
+                    if (cancionMesa != null)
+                    {
+                        switch (nuevoEstado)
+                        {
+                            case 2: // Estado Servido
+                                cancionMesa.EstadoEspecial = 0;
+                                break;
+                            case 3: // Estado Pagado
+                                cancionMesa.EstadoEspecial = 2;
+                                break;
+                            case 4: // Estado Eliminado
+                                cancionMesa.IdEstadoCancion = 4;
+                                break;
+                        }
+                        _context.CancionesMesas.Update(cancionMesa);
+                    }
+                }
             }
-            await _context.SaveChangesAsync();
-            var estadoNombre = _context.EstadosPedidos.FirstOrDefault(e => e.IdEstadoPedido == nuevoEstado)?.NombreEstado ?? "Desconocido";
-            return Content(estadoNombre);
         }
+    }
+    await _context.SaveChangesAsync();
+    var estadoNombre = await _context.EstadosPedidos
+        .Where(e => e.IdEstadoPedido == nuevoEstado)
+        .Select(e => e.NombreEstado)
+        .FirstOrDefaultAsync() ?? "Desconocido";
+    return Content(estadoNombre);
+}
 
 
 
@@ -146,8 +185,8 @@ namespace Karaoke.Controllers
     return Ok(canciones);
         }
 
-        [HttpPost("CerrarMesa")]
-        public async Task<IActionResult> CerrarMesa(int mesaId)
+        [HttpPost("CerrarPedidosMesa")]
+        public async Task<IActionResult> CerrarPedidosMesa(int mesaId)
         {
             var pedidos = _context.Pedidos
                 .Where(p => p.IdMesa == mesaId && (p.IdEstadoPedido == 1 || p.IdEstadoPedido == 2 || p.IdEstadoPedido == 5));
@@ -179,11 +218,29 @@ public async Task<IActionResult> VerificarCancionesPendientes(int mesaId)
         .Where(c => c.IdMesa == mesaId && c.IdEstadoCancion == 1) // Estado 1 = Pendiente
         .Select(c => new {
             id = c.IdCancionMesa,
-            estado = c.IdEstadoCancionNavigation.NombreEstado
+            detalle = c.Canciones,
+            estadoEspecial = c.EstadoEspecial
         })
         .ToListAsync();
 
     return Ok(canciones);
+}
+
+[HttpPost("CierreMesa")]
+public async Task<IActionResult> CierreMesa (int mesaId)
+{
+    var cmd = _context.Database.GetDbConnection().CreateCommand();
+    cmd.CommandText = "ExtraerTotalMesa";
+    cmd.CommandType = CommandType.StoredProcedure;
+
+    cmd.Parameters.Add(new SqlParameter("@IdMesa", SqlDbType.Int) { Value = mesaId });
+
+    _context.Database.OpenConnection();
+    await cmd.ExecuteNonQueryAsync();
+    _context.Database.CloseConnection();
+
+    return Ok();
+
 }
 
 [HttpGet("ObtenerMesa")]
