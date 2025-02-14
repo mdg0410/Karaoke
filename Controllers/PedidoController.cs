@@ -42,7 +42,6 @@ namespace Karaoke.Controllers
 
             if (validarCertificado == null)
             {
-                Console.WriteLine("Certificado no encontrado");
                 return NotFound("Certificado no encontrado");
             }
 
@@ -87,8 +86,6 @@ namespace Karaoke.Controllers
                 await cmd.ExecuteNonQueryAsync();
                 _context.Database.CloseConnection();
             }
-            Console.WriteLine("Pedido enviado correctamente");
-
             return Ok("Pedido enviado correctamente");
         }
 
