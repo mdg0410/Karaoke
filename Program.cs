@@ -1,7 +1,10 @@
 using Karaoke.Data;
+using Karaoke.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSignalR();
 
 // Context for the database
 
@@ -35,11 +38,13 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapHub<KaraokeHub>("/karaokeHub");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Ruta personalizada para el método Validar
+// Ruta personalizada para el mï¿½todo Validar
 app.MapControllerRoute(
     name: "mesaValidar",
     pattern: "{controller=Mesa}/{action=Validar}/{idMesa?}");
@@ -51,6 +56,35 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "enviarFormulario",
     pattern: "{controller=Karaoke}/{action=EnviarFormulario}/{data?}");
+
+app.MapControllerRoute(
+    name: "actualizarMesa",
+    pattern: "{controller=Admin}/{action=ActualizarMesa}/{idMesa?}/{idEstadoMesa?}");
+
+app.MapControllerRoute(
+    name: "actualizarEstadoEspecial",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoEspecial}/{idMesa?}/{idEstadoMesa?}");
+
+app.MapControllerRoute(
+    name: "actualizarEstadoPedido",
+    pattern: "{controller=Admin}/{action=ActualizarEstadoPedido}/{codigoPedido?}/{nuevoEstado?}");
+
+//En construcciï¿½n
+
+
+app.MapControllerRoute(
+    name: "cerrarPedidosMesa",
+    pattern: "{controller=Admin}/{action=CerrarPedidosMesa}/{idMesa?}");
+
+app.MapControllerRoute(
+    name: "CerrarCancionesMesa",
+    pattern: "{controller=Admin}/{action=CerrarCancionesMesa}/{idMesa?}");
+
+app.MapControllerRoute(
+    name: "CierreMesa",
+    pattern: "{controller=Admin}/{action=CierreMesa}/{idMesa?}");
+
+//Fin de construcciï¿½n
 
 app.MapControllers();
 

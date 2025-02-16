@@ -1,0 +1,126 @@
+﻿/* Estilos para las mesas */
+
+body {
+    background-color: #f8f9fa;
+    color: #0c0c0c;
+}
+
+.mesa {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    background-size: cover;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+    .mesa.libre {
+        background-image: url('../img/Mesas/Mesa-Libre.svg');
+    }
+
+    .mesa.ocupada {
+        background-image: url('../img/Mesas/Mesa-Ocupada.svg');
+    }
+
+    .mesa.reservada {
+        background-image: url('../img/Mesas/Mesa-Reservada.svg');
+    }
+
+    .mesa.fueraservicio {
+        background-image: url('../img/Mesas/Mesa-FueraServicio.svg');
+    }
+
+    .mesa.cuenta {
+        background-image: url('../img/Mesas/Mesa-Cuenta.svg');
+    }
+
+/* Estilos para el panel lateral */
+.card {
+    border: none;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Estilos para los totales */
+.p-3.border.bg-light {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Ajuste de espacio entre las mesas */
+.mesas-container {
+    padding: 10px; /* Ajusta el espacio entre las mesas */
+}
+
+/* Estilos para los totales de las mesas */
+.totales-mesas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+    .totales-mesas > div {
+        margin: 5px;
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+
+
+
+/* Estilos para el contenedor de pedidos */ .pedidos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Estilos para el grupo de pedidos */ .pedido-group {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+/* Estilos para el encabezado del grupo de pedidos */ .pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+    .pedido-header.codigo {
+        font-weight: bold;
+    }
+
+    .pedido-header.total {
+        font-weight: bold;
+    }
+
+/* Estilos para la tabla de detalles de pedidos */ .table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+    .table th, .table td {
+        padding: 5px;
+    }
+
+/* Estilos para los botones de control */ .botones-control {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.boton-seleccionado {
+  background-color: #8713df; /* Cambia el color de fondo según tu preferencia */
+  color: white;
+}

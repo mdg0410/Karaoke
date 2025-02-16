@@ -1,0 +1,345 @@
+﻿@model Karaoke.ViewModels.AdminViewModel
+
+
+@{
+
+    ViewData["Title"] = "Admin - Mesas";
+
+}
+
+
+<nav>
+
+    <ul class="nav nav-tabs">
+
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" data-bs-target="#mesas" href="#">Mesas</a></li>
+
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#pedidos" href="#">Pedidos</a></li>
+
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#canciones" href="#">Canciones</a></li>
+
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#avanzado" href="#">Avanzado</a></li>
+
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" data-bs-target="#cierre" href="#">Cierre</a></li>
+
+    </ul>
+
+</nav>
+
+
+<div class="tab-content">
+
+    <div id="mesas" class="tab-pane fade show active">
+
+        <div class="row mt-3">
+
+            <div class="col-md-8">
+
+                <div class="col-md-12">
+
+                    <ul class="nav nav-pills nav-fill">
+
+                        @foreach (var estado in Model.Mesas.EstadosMesa)
+
+                        {
+
+                            <li class="nav-item">
+
+                                <a class="nav-link @(estado.IdEstadoMesa == 1 ? "active" : "")" data-bs-toggle="tab" data-bs-target="#@estado.NombreEstado.ToLower()" data-estado="@estado.NombreEstado.ToLower()" href="#">
+
+                                    @estado.NombreEstado
+
+                                </a>
+
+                            </li>
+
+                        }
+
+                    </ul>
+
+                </div>
+
+                <div class="mesas-container d-flex flex-wrap">
+
+                    @for (int i = 1; i <= 15; i++)
+
+                    {
+
+                        var mesa = Model.Mesas.ListaMesas.FirstOrDefault(m => m.NumeroMesa == i);
+
+                        var estadoMesa = mesa?.IdEstadoMesaNavigation.NombreEstado.ToLower() ?? "libre";
+
+
+                        <div class="mesa @estadoMesa" data-mesa-id="@i">
+
+                            @i
+
+                        </div>
+
+                    }
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <h5>Opciones de Mesa</h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div>
+
+                            <h5>Seleccionar Mesa</h5>
+
+                            <div class="row">
+                                @foreach (var mesa in Model.Mesas.ListaMesas)
+                                {
+                                    var isChecked = mesa.EstadoEspecial == true;
+                                    var isDisabled = mesa.IdEstadoMesaNavigation.NombreEstado.ToLower() == "fueraservicio";
+
+                                    <div class="col-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="mesa-check-@mesa.NumeroMesa" @(isChecked ? "checked" : "") @(isDisabled ? "disabled" : "") onchange="actualizarEstadoEspecial(@mesa.IdMesa, this.checked)">
+                                            <label class="form-check-label" data-mesa-id="@mesa.NumeroMesa" for="mesa-check-@mesa.NumeroMesa">Mesa @mesa.NumeroMesa</label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+
+                        <div class="mt-3">
+
+                            <h5>Total Mesas Consumido</h5>
+
+                            <div class="p-3 border bg-light">@Model.Totales.TotalGeneral</div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="pedidos" class="tab-pane fade">
+        <h3>Pedidos</h3>
+
+        <div class="mesas-buttons mb-3">
+            @foreach (var mesa in Model.Mesas.ListaMesas) {
+              <button class="btn btn-outline-primary mesa-button" data-mesa-id="@mesa.IdMesa">Mesa @mesa.NumeroMesa</button>
+            }
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div id="listaPedidos" class="pedidos-container">
+                    @foreach (var grupoPedido in Model.Pedidos.ListaPedidos.GroupBy(p => p.CodigoPedido))
+                    {
+                        <div class="pedido-group" data-mesa-id="@grupoPedido.First().IdMesa" data-pedido-codigo="@grupoPedido.Key">
+                            <div class="pedido-header" data-estado-pedido="@grupoPedido.First().IdEstadoPedidoNavigation?.NombreEstado.ToLower()">
+                                <div class="codigo">Código: @grupoPedido.Key</div>
+                                <div class="total">Total: $@grupoPedido.Sum(p => p.Cantidad * p.IdProductoNavigation?.Precio)</div>
+                                <button class="btn btn-sm btn-secondary" data-bs-toggle="collapse" data-bs-target="#detalles-@grupoPedido.Key">
+                                    Ver
+                                </button>
+                            </div>
+
+                            <!-- Detalles del pedido (inicialmente colapsados) -->
+                            <div id="detalles-@grupoPedido.Key" class="collapse pedido-details">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var pedido in grupoPedido)
+                                        {
+                                            <tr>
+                                                <td>@pedido.IdProductoNavigation?.Nombre</td>
+                                                <td>@pedido.Cantidad</td>
+                                                <td >$@pedido.IdProductoNavigation?.Precio</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <div class="botones-control">
+                                    <button class="btn btn-sm btn-success btn-servido" data-pedido-codigo="@grupoPedido.Key">Servido</button>
+                                    <button class="btn btn-sm btn-warning btn-pagado" data-pedido-codigo="@grupoPedido.Key">Pagado</button>
+                                    <button class="btn btn-sm btn-danger btn-eliminar" data-pedido-codigo="@grupoPedido.Key">Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Parte 2: Botones de control y totales -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Controles y Totales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2 mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <button id="btnCerrarMesa" class="btn btn-danger w-100">Cerrar Mesa</button>
+                                </div>
+                                <div class="col-6">
+                                    <button id="btnDesactivarMesa" class="btn btn-warning w-100">Desactivar Mesa</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <button id="btnFiltrarPendientes" class="btn btn-primary w-100">Ver Pendientes</button>
+                                </div>
+                                <div class="col-6">
+                                    <button id="btnFiltrarServidos" class="btn btn-primary w-100">Ver Servidos</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <button id="btnFiltrarPagados" class="btn btn-primary w-100">Ver Pagados</button>
+                                </div>
+                                <div class="col-6">
+                                    <button id="btnFiltrarEnCuenta" class="btn btn-primary w-100">Ver En Cuenta</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button id="btnVerCanciones" class="btn btn-info w-100">Ver Canciones</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Totales -->
+                        <div class="totales">
+                            <h5>Totales</h5>
+                            <p>Pagado: <span id="totalPagado">$0.00</span></p>
+                            <p>Servido: <span id="totalServido">$0.00</span></p>
+                            <p>Pendiente: <span id="totalPendiente">$0.00</span></p>
+                            <p>En Cuenta: <span id="totalEnCuenta">$0.00</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pop-up de confirmación para cerrar mesa -->
+    <div id="popupCerrarMesa" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cerrar Mesa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="mensajeCerrarMesa"></p>
+                    <ul id="listaPendientes"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmarCerrarMesa">Confirmar</button>
+                    <button type="button" disabled id="totalCierreMesa">Total: $<span id="totalCerrarMesa">0.00</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pop-up para ver canciones -->
+<div id="popupVerCanciones" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lista de Canciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul id="listaCanciones">
+                    <!-- Aquí se llenará la lista de canciones -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+    <div id="canciones" class="tab-pane fade">
+
+        <h3>Canciones</h3>
+
+        <ul id="cancionesLista" class="list-group">
+
+        </ul>
+        @* @foreach(var cancion in Model.Canciones.ListaCanciones)
+
+        {
+
+            <div class="cancion">
+
+                <div class="titulo">@cancion.IdCancionMesa</div>
+
+                <div class="artista">@cancion.Canciones</div>
+
+                <div class="genero">@cancion.IdEstadoCancionNavigation</div>
+
+                <div class="duracion">@cancion.IdMesa</div>
+
+            </div>
+
+        } *@
+
+    </div>
+
+
+    <div id="avanzado" class="tab-pane fade">
+
+        <h3>Avanzado</h3>
+
+    </div>
+
+
+    <div id="cierre" class="tab-pane fade">
+
+        <h3>Cierre</h3>
+
+    </div>
+
+</div>
+
+
+<!-- Estilos personalizados -->
+
+<link rel="stylesheet" href="~/css/admin.css">
+
+<script src="~/js/admin/ui.js"></script>
+<script src="~/js/admin/admin.js"></script> 
+<script src="~/js/admin/mesas.js" type="module"></script>
+<script src="~/js/admin/pedido.js"></script>
+<script src="~/js/admin/cancion.js"></script>
+<script src="~/js/admin/cierre.js"></script>
+
+
